@@ -1,34 +1,30 @@
-chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
-    console.log("received the popup msg");
-    if(message.task=="activate_extension"){
-        
-        
-        // heading class= ytLockupMetadataViewModelHeadingReset     to get title => .ttle
-        // video thumbnail container = ytThumbnailViewModelHost ytThumbnailViewModelAspectRatio16By9 ytThumbnailViewModelLarge
-        // the whole container of content => .content    -> to exclude the short form content => .contents
-    
-        localStorage.setItem("lens_activate","true");
-        sendResponse({isActive:true,message:"done!"})
-    
-    }
-    else{
-        console.log("no such message",sender);
-    }
-return true;
-})
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("received the popup msg");
+  if (message.task == "activate_extension") {
+    // heading class= ytLockupMetadataViewModelHeadingReset     to get title => .ttle
+    // video thumbnail container = ytThumbnailViewModelHost ytThumbnailViewModelAspectRatio16By9 ytThumbnailViewModelLarge
+    // the whole container of content => .content    -> to exclude the short form content => .contents
+
+    localStorage.setItem("lens_activate", "true");
+    sendResponse({ isActive: true, message: "done!" });
+  } else {
+    console.log("no such message", sender);
+  }
+  return true;
+});
 
 // --- Initialize State ---
-chrome.storage.local.get(['lens_active'], (result) => {
-    console.log("reult:",result.lens_active);
+chrome.storage.local.get(["lens_active"], (result) => {
+  console.log("reult:", result.lens_active);
   if (result.lens_active === true) {
-    console.log("starting to filter")
+    console.log("starting to filter");
     startFiltering();
   }
 });
 
 // --- Listen for Real-time Changes (from Popup) ---
 chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'local' && changes.lens_active) {
+  if (namespace === "local" && changes.lens_active) {
     if (changes.lens_active.newValue == true) {
       startFiltering();
     } else {
@@ -37,47 +33,51 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-
 let observer: MutationObserver | null = null;
-const VIDEO_SELECTORS = 'ytd-rich-item-renderer, ytd-video-renderer';
+const VIDEO_SELECTORS = "ytd-rich-item-renderer, ytd-video-renderer";
 
 // --- Core Logic ---
-function processVideos() {
+async function processVideos() {
   console.log("Looking for video elements");
-    const videoElements = document.querySelectorAll(VIDEO_SELECTORS);
-console.log("got the video elements");
+  const videoElements = document.querySelectorAll(VIDEO_SELECTORS);
+  console.log("got the video elements");
 
-  videoElements.forEach((videoContainer) => {
-console.log("itereating through each videos")
-    if (videoContainer.hasAttribute('data-extension-processed')) return;
-    
-    const titleElement = videoContainer.querySelector('#video-title') as HTMLAnchorElement | HTMLSpanElement | null;
-    console.log("got the title element")
+  videoElements.forEach(async (videoContainer) => {
+    console.log("itereating through each videos");
+    if (videoContainer.hasAttribute("data-extension-processed")) return;
+
+    const titleElement = videoContainer.querySelector("#video-title") as
+      | HTMLAnchorElement
+      | HTMLSpanElement
+      | null;
+    console.log("got the title element");
     if (titleElement) {
-        const videoTitle = titleElement.textContent?.trim() || "";
-        if (checkTitleFilters(videoTitle)) {
-            // (videoContainer as HTMLElement).style.display = 'none';
-            (videoContainer as HTMLElement).style.background="rgba(255, 255, 255, 0.3"
-            console.log("the video",videoTitle,"=>blureed it")
-        }
+      const videoTitle = titleElement.textContent?.trim() || "";
+      const relativityScore = await getRelativityScore(videoTitle);
+      if (relativityScore <= 0.5) {
+        // (videoContainer as HTMLElement).style.display = 'none';
+        (videoContainer as HTMLElement).style.background =
+          "rgba(255, 255, 255, 0.3";
+        console.log("the video", videoTitle, "=>blureed it");
+      }
     }
-console.log("done with the job")
-    videoContainer.setAttribute('data-extension-processed', 'true');
+    console.log("done with the job");
+    videoContainer.setAttribute("data-extension-processed", "true");
   });
 }
 
-function checkTitleFilters(title: string): boolean {
-  return ['clickbait', 'spoiler',"song","game","video"].some(word => title.toLowerCase().includes(word));
-}
+// function checkTitleFilters(title: string): boolean {
+//   return ['clickbait', 'spoiler',"song","game","video"].some(word => title.toLowerCase().includes(word));
+// }
 
 // --- Lifecycle Management ---
-function startFiltering() {
+async function startFiltering() {
   if (observer) return; // Already running
-  
-  observer = new MutationObserver(() => processVideos());
-  const appContainer = document.querySelector('ytd-app') || document.body;
+
+  observer = await new MutationObserver(async () => await processVideos());
+  const appContainer = document.querySelector("ytd-app") || document.body;
   observer.observe(appContainer, { childList: true, subtree: true });
-  
+
   processVideos(); // Catch existing videos
 }
 
@@ -90,8 +90,17 @@ function stopFiltering() {
   document.querySelectorAll(VIDEO_SELECTORS).forEach((el) => {
     // (el as HTMLElement).style.display = '';
     // (el as HTMLElement).style.backdropFilter = '';
-    (el as HTMLElement).style.background = '';
-    el.removeAttribute('data-extension-processed');
+    (el as HTMLElement).style.background = "";
+    el.removeAttribute("data-extension-processed");
   });
 }
 
+async function getRelativityScore(videoTitle: string) {
+  const response = await chrome.runtime.sendMessage({
+    task: "evaluate_relativity",
+    title: videoTitle,
+  });
+  if (!response.sucess) return 1;
+
+  return Number(response.relativityScore);
+}

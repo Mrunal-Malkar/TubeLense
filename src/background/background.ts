@@ -32,7 +32,7 @@ function normalizeEmbedding(output: any) {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.task === "Trans") {
+  if (message?.task === "evaluate_relativity") {
   async function call() {
       try {
         const res = (await handleTransformerMessage(message.text))??"sample";
@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     }
     call();
     return true; // keep the channel open for the async work above
-  }else if(message?.task=="activate_extension"){
+  }else if(message?.task=="add here task"){
     // 
   }else {
     sendResponse({ message: "No such message" });
@@ -54,7 +54,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 async function handleTransformerMessage(text: string) {
   const extractor = await getExtractor();
   const output = await extractor(text, { pooling: "mean", normalize: true });
+  console.log("this is the non-sanitized output:",output)
   const embedding = normalizeEmbedding(output);
+  console.log("this is the sanitised",embedding)
 
   return {
     success: true,
