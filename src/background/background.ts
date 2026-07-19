@@ -32,20 +32,23 @@ function normalizeEmbedding(output: any) {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.task === "Trans") {
   async function call() {
-    if (message?.message === "Trans") {
       try {
-        const res = await handleTransformerMessage(message.text);
+        const res = (await handleTransformerMessage(message.text))??"sample";
+        console.log("the final response of the model:",res);
         sendResponse(res);
       } catch (err) {
         sendResponse({ Error: err instanceof Error ? err.message : err });
       }
-    } else {
-      sendResponse({ message: "No such message" });
     }
+    call();
+    return true; // keep the channel open for the async work above
+  }else if(message?.task=="activate_extension"){
+    // 
+  }else {
+    sendResponse({ message: "No such message" });
   }
-  call();
-  return true; // keep the channel open for the async work above
 });
 
 async function handleTransformerMessage(text: string) {

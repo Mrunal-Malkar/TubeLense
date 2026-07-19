@@ -1,12 +1,14 @@
 // import { useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 import './App.css'
-import Popup from './popup'
+import Popup from './popup/popup'
 
 function App() {
   return (
-    <>
-   <Popup/>
-    </>
+   <div className='p-2 bg-gray-800'>
+    <Toaster/>
+    <Popup/>
+   </div>
   )
 }
 

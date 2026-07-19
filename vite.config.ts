@@ -7,6 +7,7 @@ import manifest from './manifest.json' with { type: 'json' }
 import path from 'path'
 import fs from 'fs/promises'
 import type { Plugin } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 function copyTransformersAssetsPlugin(): Plugin {
   return {
@@ -37,11 +38,11 @@ function copyTransformersAssetsPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), crx({ manifest }),copyTransformersAssetsPlugin()],
+  plugins: [react(), crx({ manifest }),copyTransformersAssetsPlugin(),tailwindcss()],
   build: {
     rollupOptions: {
       input: {
-        background: "src/background.ts",
+        background: "src/background/background.ts",
       }
     }
   }

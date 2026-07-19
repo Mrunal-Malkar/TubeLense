@@ -5,13 +5,14 @@
   "action": {
     "default_popup": "index.html"
   },
+  "permissions":["activeTab","scripting","storage"],
   "background": {
-    "service_worker": "src/background.ts",
+    "service_worker": "src/background/background.ts",
     "type": "module"
   },
   "content_scripts": [
     {
-      "js": ["src/content.ts"],
+      "js": ["src/content/content.ts"],
       "matches": ["<all_urls>"]
     }
   ],"content_security_policy": {
