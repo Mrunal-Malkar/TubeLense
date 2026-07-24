@@ -26,6 +26,7 @@ chrome.storage.local.get(["lens_active"], (result) => {
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === "local" && changes.lens_active) {
     if (changes.lens_active.newValue == true) {
+      console.log("starting the filtering.")
       startFiltering();
     } else {
       stopFiltering();
@@ -100,7 +101,7 @@ async function getRelativityScore(videoTitle: string) {
     task: "evaluate_relativity",
     title: videoTitle,
   });
-  if (!response.sucess) return 1;
+  if (!response.success) return 1;
 
   return Number(response.relativityScore);
 }
