@@ -53,6 +53,17 @@ async function processVideos() {
     console.log("itereating through each videos");
     if (videoContainer.hasAttribute("data-extension-processed")) return;
 
+    // IMPORTANT: mark as processed *immediately*, synchronously, before any
+    // await. getRelativityScore() below is slow (model inference), and
+    // YouTube's DOM mutates constantly while videos lazy-load. If we waited
+    // until after the async work to set this attribute, a second
+    // MutationObserver-triggered processVideos() call could scan this same
+    // element before the first pass finished and start processing it again
+    // — that's the double-iteration you were seeing. Setting it here, before
+    // the first `await`, means any later processVideos() call (even one
+    // firing moments later) already sees the attribute and skips it.
+    videoContainer.setAttribute("data-extension-processed", "true");
+
     const titleElement = videoContainer.querySelector("#video-title") as
       | HTMLAnchorElement
       | HTMLSpanElement
@@ -63,16 +74,15 @@ async function processVideos() {
       console.log("processing video title", videoTitle);
       const relativityScore = await getRelativityScore(videoTitle);
       console.log("got the relativity score", relativityScore);
-      if (relativityScore <= 0.5) {
+      if (relativityScore <= 0.25) {
         // (videoContainer as HTMLElement).style.display = 'none';
-        (videoContainer as HTMLElement).style.backgroundColor = "white";
+        (videoContainer as HTMLElement).style.backgroundColor = "yellow";
         console.log("the video", videoTitle, "=>blureed it");
       }
     } else {
       console.log("title element not found for a video container");
     }
     console.log("done with the job");
-    videoContainer.setAttribute("data-extension-processed", "true");
   });
 }
 
@@ -111,14 +121,22 @@ function stopFiltering() {
 async function getRelativityScore(videoTitle: string) {
   console.log("sending relativity check for title", videoTitle);
   try {
+    // NOTE: this sends `title`, but background.ts's evaluate_relativity
+    // handler reads `message.text`. With the current background.ts, this
+    // means message.text is undefined for every real call from here — the
+    // "text may not be null or undefined" error you fixed earlier will
+    // resurface once this code path actually runs, since it never sends a
+    // `text` field at all. Fix by either renaming this to `text` (simplest,
+    // matches background.ts) or renaming the field background.ts reads to
+    // `title` — just make sure both sides agree.
     const response = await chrome.runtime.sendMessage({
       task: "evaluate_relativity",
-      title: videoTitle,
+      text: videoTitle,
     });
     console.log("relativity response received", response);
     if (!response.success) return 1;
 
-    return Number(response.relativityScore);
+    return Number(response.similarity);
   } catch (error) {
     console.log("getRelativityScore failed", error);
     return 1;
