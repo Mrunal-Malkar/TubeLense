@@ -16,11 +16,15 @@ function copyTransformersAssetsPlugin(): Plugin {
     async closeBundle() {
       const root = process.cwd()
       const srcDir = path.resolve(root, 'toBeInDest/dist')
-      const destDir = path.resolve(root, 'dist/transformers')
+      const destDir = path.resolve(root, 'dist/wasm')
       await fs.mkdir(destDir, { recursive: true })
       const files = [
         'ort-wasm-simd-threaded.jsep.mjs',
         'ort-wasm-simd-threaded.jsep.wasm',
+        'ort-wasm-simd-threaded.asyncify.mjs',
+        'ort-wasm-simd-threaded.asyncify.wasm',
+        'ort.wasm.mjs',
+        'ort.wasm.min.mjs',
       ]
       for (const f of files) {
         const src = path.join(srcDir, f)
@@ -43,6 +47,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: "src/background/background.ts",
+        offscreen:"src/background/offscreen.html"
       }
     }
   }

@@ -1,81 +1,92 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { pipeline } from "@huggingface/transformers";
-import { stringify } from "querystring";
+// This background service worker no longer runs the transformers.js
+// pipeline itself. onnxruntime-web's WASM backend hard-references `window`
+// during init, and a service worker has no `window` (only `self`) — that's
+// what produced "no available backend found: [wasm] ReferenceError: window
+// is not defined". WebGPU also can't reliably get an adapter from a
+// service worker context ("No available adapters"), so both backends were
+// failing here for different reasons.
+//
+// The fix: run the actual model inference in an Offscreen Document, which
+// is a real page with window/DOM. This file just ensures that document
+// exists and relays messages to it.
 
-// No env.backends.onnx.wasm.wasmPaths needed anymore — we're not using
-// the wasm backend at all, so none of that config applies.
+// IMPORTANT: the `url:` prefix is Parcel's asset-URL import scheme (Plasmo
+// is built on Parcel). Importing it this way — rather than hardcoding the
+// string "offscreen.html" — is what makes the bundler actually discover
+// offscreen.html (and, through its <script src="./offscreen.ts">,
+// offscreen.ts too) and include them in the final build output. A bare
+// string path with no import has no dependency-graph link, so Parcel has
+// no reason to bundle those files at all.
+// import offscreenHtmlUrl from "./offscreen.html?url";
 
-let extractorPromise: Promise<any> | null = null;
-async function getExtractor() {
-  if (!extractorPromise) {
-    extractorPromise = pipeline(
-      "feature-extraction",
-      "Xenova/all-MiniLM-L6-v2",
-      {
-        device: "wasm", // <-- the key change
-      },
-    );
-    console.log("got the extractorPromise", extractorPromise);
-  }
-  return extractorPromise;
+let creatingOffscreenDocument: Promise<void> | null = null;
+
+function getOffscreenDocumentPath(): string {
+  return chrome.runtime.getURL("src//background/offscreen.html");
 }
 
-function normalizeEmbedding(output: any): number[] {
-  if (typeof output?.toArray === "function") {
-    return output.toArray();
+async function hasOffscreenDocument(): Promise<boolean> {
+  if ("getContexts" in chrome.runtime) {
+    const contexts = await (chrome.runtime as any).getContexts({
+      contextTypes: ["OFFSCREEN_DOCUMENT"],
+      documentUrls: [getOffscreenDocumentPath()],
+    });
+    return contexts.length > 0;
   }
-  if (Array.isArray(output)) {
-    return output;
-  }
-  if (Array.isArray(output?.data)) {
-    return output.data;
-  }
-  // Float32Array / typed array case — not a plain Array, but array-like
-  if (output?.data && typeof output.data.length === "number") {
-    return Array.from(output.data);
-  }
-  if (typeof output?.tolist === "function") {
-    return output.tolist();
-  }
-  return [];
+  return false;
 }
 
-function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length === 0 || b.length === 0 || a.length !== b.length) {
-    return 0;
+async function ensureOffscreenDocument() {
+  if (await hasOffscreenDocument()) {
+    return;
   }
 
-  let dot = 0;
-  let normA = 0;
-  let normB = 0;
-
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+  if (creatingOffscreenDocument) {
+    await creatingOffscreenDocument;
+    return;
   }
 
-  // We already normalize:true at extraction time, so this division is
-  // usually redundant (norms ≈ 1), but keeping it makes the function
-  // correct even if normalize is ever turned off upstream.
-  const denom = Math.sqrt(normA) * Math.sqrt(normB);
-  return denom === 0 ? 0 : dot / denom;
+  creatingOffscreenDocument = chrome.offscreen.createDocument({
+    url: getOffscreenDocumentPath(),
+    reasons: [chrome.offscreen.Reason.WORKERS], // running WASM/ML workload
+    justification:
+      "Run @huggingface/transformers feature-extraction pipeline, which requires window/DOM APIs not available in a service worker.",
+  });
+
+  try {
+    await creatingOffscreenDocument;
+  } finally {
+    creatingOffscreenDocument = null;
+  }
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.task === "evaluate_relativity") {
     async function call() {
       try {
-        const secondArgument =
-          stringify(await chrome.storage.local.get("user_preference_topics")) ??
-          "car";
-        console.log("got the second argument:", secondArgument);
-        const res =
-          (await handleTransformerMessage(message.text, secondArgument)) ??
-          "sample";
+        console.log("evaluate_relativity message received", message);
+
+        // const storageResult = await chrome.storage.local.get("user_preference_topics");
+        // const secondArgument = JSON.stringify(storageResult) ?? "car";
+        const secondArgument = "car";
+        console.log("got the second argument:", secondArgument,"first argument:",);
+
+        await ensureOffscreenDocument();
+
+        // Forward to the offscreen document, which does the actual work.
+        console.log("calling for offscreen")
+        const res = await chrome.runtime.sendMessage({
+          target: "offscreen",
+          task: "evaluate_relativity",
+          text: message.title,
+          secondArgument,
+        });
+
         console.log("the final response of the model:", res);
-        sendResponse(res);
+        sendResponse(res ?? "sample");
       } catch (err) {
+        console.log("evaluate_relativity failed", err);
         sendResponse({ Error: err instanceof Error ? err.message : err });
       }
     }
@@ -87,31 +98,3 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ message: "No such message" });
   }
 });
-
-async function embedText(extractor: any, text: string): Promise<number[]> {
-  const output = await extractor(text, { pooling: "mean", normalize: true });
-  return normalizeEmbedding(output);
-}
-
-async function handleTransformerMessage(
-  firstArgument: string,
-  secondArgument: string,
-) {
-  const extractor = await getExtractor();
-
-  const [embeddingA, embeddingB] = await Promise.all([
-    embedText(extractor, firstArgument),
-    embedText(extractor, secondArgument),
-  ]);
-
-  const similarity = cosineSimilarity(embeddingA, embeddingB);
-
-  console.log("similarity score:", similarity);
-
-  return {
-    success: true,
-    firstArgument: firstArgument,
-    secondArgument: secondArgument,
-    similarity,
-  };
-}
