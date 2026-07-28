@@ -13,12 +13,80 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+// --- Site Dispatch ---
+// Central place to route to the right site's filtering logic based on the
+// current page's hostname. Add a new `case` + real start/stop functions
+// (mirroring the Youtube* pattern above) when adding support for a new site.
+function startFilteringForCurrentSite() {
+  const hostname = window.location.hostname;
+
+  switch (true) {
+    case hostname.includes("youtube.com"):
+      console.log("starting to filter (youtube)");
+      startYoutubeFiltering();
+      break;
+
+    // case hostname.includes("twitter.com"):
+    // case hostname.includes("x.com"):
+    //   console.log("starting to filter (twitter)");
+    //   startTwitterFiltering();
+    //   break;
+
+    // case hostname.includes("reddit.com"):
+    //   console.log("starting to filter (reddit)");
+    //   startRedditFiltering();
+    //   break;
+
+    default:
+      console.log("no filtering logic for this site", hostname);
+  }
+}
+
+function stopFilteringForCurrentSite() {
+  const hostname = window.location.hostname;
+
+  switch (true) {
+    case hostname.includes("youtube.com"):
+      console.log("stopping filter (youtube)");
+      stopYoutubeFiltering();
+      break;
+
+    // case hostname.includes("twitter.com"):
+    // case hostname.includes("x.com"):
+    //   console.log("stopping filter (twitter)");
+    //   stopTwitterFiltering();
+    //   break;
+
+    // case hostname.includes("reddit.com"):
+    //   console.log("stopping filter (reddit)");
+    //   stopRedditFiltering();
+    //   break;
+
+    default:
+      console.log("no filtering logic for this site", hostname);
+  }
+}
+
+// --- Dummy stubs for other sites (implement when adding support) ---
+// function startTwitterFiltering() {
+//   console.log("startTwitterFiltering called (not implemented)");
+// }
+// function stopTwitterFiltering() {
+//   console.log("stopTwitterFiltering called (not implemented)");
+// }
+// function startRedditFiltering() {
+//   console.log("startRedditFiltering called (not implemented)");
+// }
+// function stopRedditFiltering() {
+//   console.log("stopRedditFiltering called (not implemented)");
+// }
+
 // --- Initialize State ---
 chrome.storage.local.get(["lens_active"], (result) => {
   console.log("reult:", result.lens_active);
   if (result.lens_active === true) {
     console.log("starting to filter");
-    startFiltering();
+    startFilteringForCurrentSite();
   } else {
     console.log("extension state is not active yet", result);
   }
@@ -30,22 +98,22 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === "local" && changes.lens_active) {
     if (changes.lens_active.newValue == true) {
       console.log("starting the filtering.");
-      startFiltering();
+      startFilteringForCurrentSite();
     } else {
       console.log("stopping the filtering", changes.lens_active);
-      stopFiltering();
+      stopFilteringForCurrentSite();
     }
   }
 });
 
-let observer: MutationObserver | null = null;
-let navigateFinishHandler: (() => void) | null = null;
+let youtubeObserver: MutationObserver | null = null;
+let youtubeNavigateFinishHandler: (() => void) | null = null;
 
 // Every container type YouTube uses across Home, Search, Watch (related/sidebar),
 // Subscriptions, Channel pages, and Shorts shelves. YouTube changes these
 // periodically (the ongoing "Lockup" redesign) — if a video type still isn't
 // getting flagged, inspect it in devtools and add its tag name here.
-const VIDEO_SELECTORS = [
+const YOUTUBE_VIDEO_SELECTORS = [
   "ytd-rich-item-renderer", // Home page grid
   "ytd-video-renderer", // Search results, many shelves
   "ytd-compact-video-renderer", // Watch page sidebar / "related" list
@@ -59,7 +127,7 @@ const VIDEO_SELECTORS = [
 // Multiple strategies for pulling a title out of a container, since old and
 // new (Lockup) renderer markup differ, and some elements expose title only
 // via aria-label before the visible text node is populated.
-const TITLE_SELECTORS = [
+const YOUTUBE_TITLE_SELECTORS = [
   "#video-title",
   "yt-formatted-string#video-title",
   ".yt-lockup-metadata-view-model__heading-reset",
@@ -67,8 +135,8 @@ const TITLE_SELECTORS = [
   "a#video-title-link",
 ];
 
-function extractTitle(container: Element): string {
-  for (const sel of TITLE_SELECTORS) {
+function extractYoutubeTitle(container: Element): string {
+  for (const sel of YOUTUBE_TITLE_SELECTORS) {
     const el = container.querySelector(sel);
     const text = el?.textContent?.trim();
     if (text) return text;
@@ -90,14 +158,14 @@ function debounce<T extends (...args: any[]) => void>(fn: T, waitMs: number) {
 }
 
 // --- Core Logic ---
-async function processVideos() {
-  const videoElements = document.querySelectorAll(VIDEO_SELECTORS);
+async function processYoutubeVideos() {
+  const videoElements = document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS);
 
   videoElements.forEach(async (videoContainer) => {
     // Prevent overlapping async passes on the same node.
     if (videoContainer.hasAttribute("data-extension-processing")) return;
 
-    const currentTitle = extractTitle(videoContainer);
+    const currentTitle = extractYoutubeTitle(videoContainer);
     if (!currentTitle) {
       // Title not rendered/bound yet (lazy-loaded tile). Don't mark it —
       // the next mutation batch (or debounced pass) will retry it.
@@ -115,7 +183,7 @@ async function processVideos() {
     videoContainer.setAttribute("data-extension-title", currentTitle);
 
     try {
-      const relativityScore = await getRelativityScore(currentTitle);
+      const relativityScore = await getYoutubeRelativityScore(currentTitle);
       (videoContainer as HTMLElement).style.backgroundColor =
         relativityScore <= 0.25 ? "yellow" : "";
     } finally {
@@ -124,14 +192,14 @@ async function processVideos() {
   });
 }
 
-const scheduleProcessVideos = debounce(() => {
-  processVideos();
+const scheduleProcessYoutubeVideos = debounce(() => {
+  processYoutubeVideos();
 }, 150);
 
 // --- Lifecycle Management ---
-async function startFiltering() {
-  console.log("startFiltering called");
-  if (observer) return; // Already running
+async function startYoutubeFiltering() {
+  console.log("startYoutubeFiltering called");
+  if (youtubeObserver) return; // Already running
 
   if (document.readyState === "loading") {
     await new Promise<void>((resolve) =>
@@ -139,37 +207,37 @@ async function startFiltering() {
     );
   }
 
-  observer = new MutationObserver(() => scheduleProcessVideos());
-  observer.observe(document.body, { childList: true, subtree: true });
+  youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
+  youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
   // YouTube is an SPA: navigating Home -> Search -> Subscriptions etc. does
   // NOT reload the page, it fires this custom event instead. Hooking it
   // makes flagging kick in immediately on navigation rather than waiting on
   // whatever DOM mutations happen to fire.
-  navigateFinishHandler = () => scheduleProcessVideos();
-  document.addEventListener("yt-navigate-finish", navigateFinishHandler);
+  youtubeNavigateFinishHandler = () => scheduleProcessYoutubeVideos();
+  document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
 
-  processVideos(); // Catch existing videos already on the page
+  processYoutubeVideos(); // Catch existing videos already on the page
 }
 
-function stopFiltering() {
-  console.log("stopFiltering called");
-  if (observer) {
-    observer.disconnect();
-    observer = null;
+function stopYoutubeFiltering() {
+  console.log("stopYoutubeFiltering called");
+  if (youtubeObserver) {
+    youtubeObserver.disconnect();
+    youtubeObserver = null;
   }
-  if (navigateFinishHandler) {
-    document.removeEventListener("yt-navigate-finish", navigateFinishHandler);
-    navigateFinishHandler = null;
+  if (youtubeNavigateFinishHandler) {
+    document.removeEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
+    youtubeNavigateFinishHandler = null;
   }
-  document.querySelectorAll(VIDEO_SELECTORS).forEach((el) => {
+  document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS).forEach((el) => {
     (el as HTMLElement).style.backgroundColor = "";
     el.removeAttribute("data-extension-title");
     el.removeAttribute("data-extension-processing");
   });
 }
 
-async function getRelativityScore(videoTitle: string) {
+async function getYoutubeRelativityScore(videoTitle: string) {
   console.log("sending relativity check for title", videoTitle);
   try {
     const response = await chrome.runtime.sendMessage({
@@ -181,7 +249,7 @@ async function getRelativityScore(videoTitle: string) {
 
     return Number(response.similarity);
   } catch (error) {
-    console.log("getRelativityScore failed", error);
+    console.log("getYoutubeRelativityScore failed", error);
     return 1;
   }
 }
