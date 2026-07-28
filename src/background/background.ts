@@ -49,7 +49,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
         // const storageResult = await chrome.storage.local.get("user_preference_topics");
         // const secondArgument = JSON.stringify(storageResult) ?? "car";
-        const secondArgument = "car related videos";
+        const secondArgument = "A video about automotive reviews, driving test drives, vehicle modifications, racing sports, car maintenance tutorials, or ownership experiences featuring specific brands, models, engines, and road performance.";
         console.log("got the second argument:", secondArgument,"first argument:",);
 
         await ensureOffscreenDocument();

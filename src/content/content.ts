@@ -184,8 +184,10 @@ async function processYoutubeVideos() {
 
     try {
       const relativityScore = await getYoutubeRelativityScore(currentTitle);
-      (videoContainer as HTMLElement).style.backgroundColor =
-        relativityScore <= 0.25 ? "yellow" : "";
+      (videoContainer as HTMLElement).style.display =
+        relativityScore <= 0.25 ? "none" : "";
+      // (videoContainer as HTMLElement).style.backgroundColor =
+      //   relativityScore <= 0.25 ? "yellow" : "";
     } finally {
       videoContainer.removeAttribute("data-extension-processing");
     }
@@ -231,7 +233,8 @@ function stopYoutubeFiltering() {
     youtubeNavigateFinishHandler = null;
   }
   document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS).forEach((el) => {
-    (el as HTMLElement).style.backgroundColor = "";
+    // (el as HTMLElement).style.backgroundColor = "";
+    (el as HTMLElement).style.display = "";
     el.removeAttribute("data-extension-title");
     el.removeAttribute("data-extension-processing");
   });
