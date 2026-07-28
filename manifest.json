@@ -10,12 +10,11 @@
     "service_worker": "src/background/background.ts",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "js": ["src/content/content.ts"],
-      "matches": ["<all_urls>"]
-    }
-  ],"content_security_policy": {
+  "content_scripts": [{
+  "matches": ["*://*.youtube.com/*", "*://*.twitter.com/*","*://*.x.com/*","*://*.google.com/*","*://*.instagram.com/*"],
+  "js": ["src/content/content.ts","src/content/youtube.ts", "src/content/x.ts", "src/content/instagram.ts","src/content/google.ts"]
+}]
+,"content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   }
   ,"web_accessible_resources": [
