@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 type PlatformId = 'yt' | 'x' | 'insta' | 'google';
 
@@ -17,10 +18,14 @@ const PlatformsToggles = () => {
   });
 
   const togglePlatform = (platformId: PlatformId) => {
-    setPlatforms((prev) => ({
-      ...prev,
-      [platformId]: !prev[platformId],
-    }));
+    try{
+      setPlatforms((prev) => ({
+        ...prev,
+        [platformId]: !prev[platformId],
+      }));
+    }catch(e){
+      toast.error("failed to perform operation");
+    }
   };
 
   const platformData: PlatformOption[] = [
@@ -32,6 +37,7 @@ const PlatformsToggles = () => {
 
   return (
         <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10 relative">
+          <ToastContainer/>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-sm font-medium text-gray-800">Platform Blockers</h3>
             <span className="text-[10px] text-gray-400 font-medium">Toggle active filtering</span>

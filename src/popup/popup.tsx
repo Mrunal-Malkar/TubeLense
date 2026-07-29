@@ -26,10 +26,11 @@ import {
   PieChart, 
   History 
 } from 'lucide-react';
+import PlatformsToggles from "../components/toggle_platforms";
 
 const ExtensionPopup = () => {
   return (
-    <div className="w-95 h-195 bg-[#f6f7fb] rounded-4xl p-5 font-sans relative overflow-hidden shadow-2xl flex flex-col gap-4 text-[#1a1a2e]">
+    <div className="w-95 h-195 bg-[#f6f7fb] bg-amber-500 rounded-4xl p-5 font-sans relative overflow-auto scrollbar-none shadow-2xl flex flex-col gap-4 text-[#1a1a2e]">
         
       {/* --- HEADER --- */}
       <Header />
@@ -80,7 +81,7 @@ const ExtensionPopup = () => {
         </div>
       </div>
 
-      
+      <PlatformsToggles/>
 
       {/* --- FEED ALIGNMENT --- */}
       <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">

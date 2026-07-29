@@ -1,12 +1,16 @@
 body {
   margin: 0;
   min-width: 320px;
+  overflow:none;
   min-height: 100vh;
   padding: 4px;
   border-radius: 8px;
   /* background: #f7f8fc; */
   background: transparent;
 }
+/* scrollbar-width: none;
+-ms-overflow-style: none
+::-webkit-scrollbar { display: none; } */
 
 #root {
   min-height: 100vh;
