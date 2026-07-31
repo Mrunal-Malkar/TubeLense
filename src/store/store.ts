@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { counterSlice } from './platformToggleStore'
+import preferenceReducer from "./baseInfoStore"
 
 export const store = configureStore({
   reducer: {
-    platformStatus:counterReducer
+    preference:preferenceReducer
   },
 })
 

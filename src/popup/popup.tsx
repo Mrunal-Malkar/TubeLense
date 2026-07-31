@@ -16,20 +16,27 @@ import {
 import PlatformsToggles from "../components/toggle_platforms";
 import { ToastContainer } from "react-toastify";
 import FocusScoreAndAnimatedSphere from "../components/FocusScoreAndAnimatedSphere";
-import { useQuery } from "@tanstack/react-query";
-import { getBaseInfo } from "../functions/initialStateProcessing";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../store/store";
+import { toggleActiveMode } from "../store/baseInfoStore";
 
 const ExtensionPopup = () => {
 
-  const {data:baseInfo,isLoading,error}=useQuery({
-  queryKey:["getBaseInfo"],
-  queryFn:getBaseInfo
-});
+//   const {data:baseInfo,isLoading,error}=useQuery({
+//   queryKey:["getBaseInfo"],
+//   queryFn:getBaseInfo
+// });
+const dispatch=useDispatch();
+const preference=useSelector((state: RootState)=>state.preference);
+const baseCard=preference.cards.selectedCardId;
+const base_activeMode=preference.activeMode;
 
-
-if(error){
-  return 
-}
+function changeMode(){
+dispatch(toggleActiveMode());
+};
+// if(error){
+//   return 
+// }
   return (
     <div className="w-95 h-195 bg-[#f6f7fb] bg-amber-500 rounded-4xl p-5 font-sans relative overflow-auto scrollbar-none shadow-2xl flex flex-col gap-4 text-[#1a1a2e]">
       <ToastContainer />
@@ -64,12 +71,12 @@ if(error){
       </div>
 
       {/* --- CURRENT BRAIN MODE --- */}
-      <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10">
+      <div className={`${base_activeMode=="cards"?"bg-white":"bg-gray-300"} rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10`}>
         <div>
-          <h3 className="text-sm font-semibold mb-1">Current Brain Mode</h3>
+          <h3 onClick={changeMode} className="text-sm font-semibold mb-1">Current Card</h3>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-            <span className="font-bold text-sm">Deep Work</span>
+            <span className="font-bold text-sm">{baseCard}</span>
           </div>
           <p className="text-[10px] text-gray-500">
             High focus • Low distraction

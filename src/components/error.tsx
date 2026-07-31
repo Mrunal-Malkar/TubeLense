@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { AlertTriangle, Mail} from "lucide-react";
 import { Email } from "../lib/statics";
 import ActionableToast from "../ui/actionableToast";
