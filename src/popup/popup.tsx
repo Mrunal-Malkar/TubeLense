@@ -19,6 +19,8 @@ import FocusScoreAndAnimatedSphere from "../components/FocusScoreAndAnimatedSphe
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { toggleActiveMode } from "../store/baseInfoStore";
+import { useState } from "react";
+import CardDrawer from "../components/cardDrawer";
 
 const ExtensionPopup = () => {
 
@@ -26,6 +28,7 @@ const ExtensionPopup = () => {
 //   queryKey:["getBaseInfo"],
 //   queryFn:getBaseInfo
 // });
+const [showConfirmCardClickPopup,setShowConfirmCardClickPopup]=useState<boolean>(false);
 const dispatch=useDispatch();
 const preference=useSelector((state: RootState)=>state.preference);
 const baseCard=preference.cards.selectedCardId;
@@ -34,11 +37,13 @@ const base_activeMode=preference.activeMode;
 function changeMode(){
 dispatch(toggleActiveMode());
 };
+
+
 // if(error){
 //   return 
 // }
   return (
-    <div className="w-95 h-195 bg-[#f6f7fb] bg-amber-500 rounded-4xl p-5 font-sans relative overflow-auto scrollbar-none shadow-2xl flex flex-col gap-4 text-[#1a1a2e]">
+    <div className="w-95 min-h-195 h-fit pb-8 bg-[#f6f7fb] rounded-4xl p-3 font-sans relative overflow-y-hidden scrollbar-auto shadow-2xl flex flex-col gap-3 text-[#1a1a2e]">
       <ToastContainer />
       {/* --- HEADER --- */}
       <Header />
@@ -58,7 +63,7 @@ dispatch(toggleActiveMode());
             <div className="text-[10px] text-gray-500 mt-1">Time Saved</div>
           </div>
           <div className="flex flex-col items-center justify-center text-center">
-            <EyeOff size={20} className="text-gray-400 mb-2" />
+            <EyeOff onClick={changeMode} size={20} className="text-gray-400 mb-2" />
             <div className="text-xl font-bold">0</div>
             <div className="text-[10px] text-gray-500 mt-1">Doomscrolls</div>
           </div>
@@ -71,9 +76,9 @@ dispatch(toggleActiveMode());
       </div>
 
       {/* --- CURRENT BRAIN MODE --- */}
-      <div className={`${base_activeMode=="cards"?"bg-white":"bg-gray-300"} rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10`}>
+      <div onClick={()=>setShowConfirmCardClickPopup(true)} className={`${base_activeMode=="cards"?"":"opacity-85"} cursor-pointer bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10`}>
         <div>
-          <h3 onClick={changeMode} className="text-sm font-semibold mb-1">Current Card</h3>
+          <h3 className="text-sm font-semibold mb-1">Current Card</h3>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
             <span className="font-bold text-sm">{baseCard}</span>
@@ -185,6 +190,9 @@ dispatch(toggleActiveMode());
           <span className="text-[10px] font-medium">History</span>
         </button>
       </div>
+
+      {/* confirm card Click popup drawer (down to top) */}
+      <CardDrawer isOpen={showConfirmCardClickPopup} onClose={() => setShowConfirmCardClickPopup(false)} />
     </div>
   );
 };
