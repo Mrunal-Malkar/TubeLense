@@ -8,7 +8,7 @@ export const initialValues={
   },
 
   cards: {
-    selectedCardId: "coder", // null if none chosen yet
+    selectedCardId: "Rest", // null if none chosen yet
     // don't store card *definitions* here — see below
   }
 }

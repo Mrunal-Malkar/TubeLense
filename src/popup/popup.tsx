@@ -3,7 +3,6 @@ import {
   Clock,
   EyeOff,
   ShieldCheck,
-  Brain,
   X,
   Smile,
   Plus,
@@ -21,6 +20,7 @@ import type { RootState } from "../store/store";
 import { toggleActiveMode } from "../store/baseInfoStore";
 import { useState } from "react";
 import CardDrawer from "../components/cardDrawer";
+import { CARD_DATA, type CardData } from "../lib/cards";
 
 const ExtensionPopup = () => {
 
@@ -31,7 +31,9 @@ const ExtensionPopup = () => {
 const [showConfirmCardClickPopup,setShowConfirmCardClickPopup]=useState<boolean>(false);
 const dispatch=useDispatch();
 const preference=useSelector((state: RootState)=>state.preference);
-const baseCard=preference.cards.selectedCardId;
+console.log("the preference",preference);
+const baseCard:CardData | undefined=CARD_DATA.find((card) => card.name === String(preference.cards.selectedCardId));
+console.log("The baseCard",baseCard);
 const base_activeMode=preference.activeMode;
 
 function changeMode(){
@@ -78,13 +80,13 @@ dispatch(toggleActiveMode());
       {/* --- CURRENT BRAIN MODE --- */}
       <div onClick={()=>setShowConfirmCardClickPopup(true)} className={`${base_activeMode=="cards"?"":"opacity-85"} cursor-pointer bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10`}>
         <div>
-          <h3 className="text-sm font-semibold mb-1">Current Card</h3>
+          <h3 className="text-sm font-semibold mb-1">{baseCard?.title}</h3>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-            <span className="font-bold text-sm">{baseCard}</span>
+            <span className="font-bold text-sm">{baseCard?.name}</span>
           </div>
           <p className="text-[10px] text-gray-500">
-            High focus • Low distraction
+            {baseCard?.description}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -98,13 +100,13 @@ dispatch(toggleActiveMode());
           >
             <path
               d="M0 10 Q 15 20, 30 10 T 60 10"
-              stroke="#10b981"
+              stroke={baseCard?.svgColor}
               strokeWidth="2"
               fill="transparent"
             />
           </svg>
           <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
-            <Brain size={20} />
+            {baseCard?.icon && <baseCard.icon size={20} />}
           </div>
         </div>
       </div>
@@ -172,7 +174,7 @@ dispatch(toggleActiveMode());
       </button>
 
       {/* --- BOTTOM NAVIGATION --- */}
-      <div className="absolute bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 flex justify-around items-center z-20">
+      <div className="sticky bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 flex justify-around items-center z-20">
         <button className="flex flex-col items-center gap-1 text-indigo-600">
           <Home size={20} />
           <span className="text-[10px] font-medium">Home</span>

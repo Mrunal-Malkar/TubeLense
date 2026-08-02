@@ -1,36 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Brain, Zap, Moon } from 'lucide-react'; 
-
-const CARD_DATA = [
-  {
-    id: 1,
-    title: "Current Card",
-    name: "Focus Mode",
-    description: "High focus • Low distraction",
-    icon: Brain,
-    colorTheme: "emerald",
-    svgColor: "#10b981"
-  },
-  {
-    id: 2,
-    title: "Alternative",
-    name: "Energy Boost",
-    description: "High energy • Fast paced",
-    icon: Zap,
-    colorTheme: "amber",
-    svgColor: "#f59e0b"
-  },
-  {
-    id: 3,
-    title: "Rest",
-    name: "Wind Down",
-    description: "Relaxed • Minimal alerts",
-    icon: Moon,
-    colorTheme: "indigo",
-    svgColor: "#6366f1"
-  }
-];
+import { CARD_DATA } from '../lib/cards';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSelectedCard } from '../store/baseInfoStore';
 
 type cardType={
     id:number;
@@ -50,10 +22,12 @@ export default function CardDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [activeCard, setActiveCard] = useState<cardType>(CARD_DATA[0]);
-
+  const dispatch=useDispatch();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const currentCard=useSelector((state:any)=>state.preference.cards.selectedCardId);
   const handleCardSelect = (card: cardType) => {
-    setActiveCard(card);
+    // setActiveCard(card);
+    dispatch(setSelectedCard(card.name));
     onClose();
   };
 
@@ -90,7 +64,7 @@ export default function CardDrawer({
             <div className="flex flex-col gap-4 pb-8">
               {CARD_DATA.map((card) => {
                 const Icon = card.icon;
-                const isActive = activeCard.id === card.id;
+                const isActive = currentCard === card.name;
 
                 return (
                   <div
