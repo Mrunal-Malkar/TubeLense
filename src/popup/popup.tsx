@@ -31,8 +31,9 @@ const ExtensionPopup = () => {
 const [showConfirmCardClickPopup,setShowConfirmCardClickPopup]=useState<boolean>(false);
 const dispatch=useDispatch();
 const preference=useSelector((state: RootState)=>state.preference);
-console.log("the preference",preference);
-const baseCard:CardData | undefined=CARD_DATA.find((card) => card.name === String(preference.cards.selectedCardId));
+console.log("preference",preference);
+
+const baseCard:CardData | undefined=(CARD_DATA.filter((card) => card.name === String(preference.cards.selectedCardName))[0]);
 console.log("The baseCard",baseCard);
 const base_activeMode=preference.activeMode;
 

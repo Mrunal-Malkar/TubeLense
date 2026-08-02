@@ -15,7 +15,7 @@ export interface PreferencesState {
   };
 
   cards: {
-    selectedCardId: string;
+    selectedCardName: string;
   };
 }
 
@@ -35,7 +35,7 @@ const initialState: PreferencesState = {
   },
 
   cards: {
-    selectedCardId: "coder",
+    selectedCardName: "Energy Boost",
   },
 };
 
@@ -101,11 +101,11 @@ export const preferencesSlice = createSlice({
       state,
       action: PayloadAction<string>
     ) {
-      state.cards.selectedCardId = action.payload;
+      state.cards.selectedCardName = action.payload;
     },
 
     clearSelectedCard(state) {
-      state.cards.selectedCardId = "";
+      state.cards.selectedCardName = "";
     },
 
     // Reset
