@@ -106,7 +106,10 @@ dispatch(toggleActiveMode());
               fill="transparent"
             />
           </svg>
-          <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+          <div className={`w-10 h-10 bg-${baseCard?.colorTheme}-500 rounded-full flex items-center justify-center text-${baseCard?.colorTheme}-500`} style={{
+                          backgroundColor: `${baseCard?.svgColor}15`,
+                          color: baseCard?.svgColor,
+                        }}>
             {baseCard?.icon && <baseCard.icon size={20} />}
           </div>
         </div>
