@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
+import { toggleSiteEnabled } from '../store/baseInfoStore';
 
 type PlatformId = 'yt' | 'x' | 'insta' | 'google';
 
@@ -10,12 +12,14 @@ type PlatformOption = {
 };
 
 const PlatformsToggles = () => {
-  
+  const dispatch=useDispatch();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const initials=useSelector((state:any)=>state.preference.custom.sites);
   const [platforms, setPlatforms] = useState<Record<PlatformId, boolean>>({
-    yt: true,
-    x: true,
-    insta: false,
-    google: false,
+    yt: initials.yt,
+    x: initials.x,
+    insta: initials.insta,
+    google: initials.google,
   });
 
   const togglePlatform = (platformId: PlatformId) => {
@@ -24,7 +28,7 @@ const PlatformsToggles = () => {
         ...prev,
         [platformId]: !prev[platformId],
       }));
-      // const platform=chrome.storage.local.set()
+      dispatch(toggleSiteEnabled(platformId));
     }catch(e){
       toast.error("failed to perform operation");
     }

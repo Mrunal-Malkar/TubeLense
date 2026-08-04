@@ -68,6 +68,13 @@ export const preferencesSlice = createSlice({
       state.custom.sites[action.payload.site] = action.payload.enabled;
     },
 
+    toggleSiteEnabled(
+      state,
+      action: PayloadAction<keyof PreferencesState["custom"]["sites"]>
+    ) {
+      state.custom.sites[action.payload] = !state.custom.sites[action.payload];
+    },
+
     setAllSites(
       state,
       action: PayloadAction<PreferencesState["custom"]["sites"]>
@@ -129,6 +136,7 @@ export const {
 
   setSelectedCard,
   clearSelectedCard,
+  toggleSiteEnabled,
 
   resetPreferences,
 } = preferencesSlice.actions;
