@@ -40,7 +40,7 @@ const initialState: PreferencesState = {
 };
 
 export const preferencesSlice = createSlice({
-  name: "preferences",
+  name: "preference",
   initialState,
 
   reducers: {

@@ -16,7 +16,6 @@ import PlatformsToggles from "../components/toggle_platforms";
 import { ToastContainer } from "react-toastify";
 import FocusScoreAndAnimatedSphere from "../components/FocusScoreAndAnimatedSphere";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../store/store";
 import { toggleActiveMode } from "../store/baseInfoStore";
 import { useState } from "react";
 import CardDrawer from "../components/cardDrawer";
@@ -28,9 +27,12 @@ const ExtensionPopup = () => {
 //   queryKey:["getBaseInfo"],
 //   queryFn:getBaseInfo
 // });
+
 const [showConfirmCardClickPopup,setShowConfirmCardClickPopup]=useState<boolean>(false);
 const dispatch=useDispatch();
-const preference=useSelector((state: RootState)=>state.preference);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const preference=useSelector((state: any)=>state.preference);
 console.log("preference",preference);
 
 const baseCard:CardData | undefined=(CARD_DATA.filter((card) => card.name === String(preference.cards.selectedCardName))[0]);

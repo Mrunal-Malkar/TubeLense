@@ -4,13 +4,22 @@ import { ToastContainer } from "react-toastify";
 const FocusScoreAndAnimatedSphere = () => {
   async function activeExtension() {
     const current = (await chrome.storage.local.get("lens_active")).lens_active;
+    if(!current){
+      await chrome.storage.local.set({ lens_active: true });
+      toast.success("activated");
+      return;
+    }
     const type = typeof current;
-    console.log("type", type);
+    console.log("type", type,"current",current);
     if (!(type == "boolean")) {
       toast.error("unexpected lens_active type");
       return;
     }
     await chrome.storage.local.set({ lens_active: !current });
+    if(current==true){
+      toast.success("deactivated");
+      return;
+    }
     toast.success("activated");
   }
 

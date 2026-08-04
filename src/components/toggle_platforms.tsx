@@ -10,6 +10,7 @@ type PlatformOption = {
 };
 
 const PlatformsToggles = () => {
+  
   const [platforms, setPlatforms] = useState<Record<PlatformId, boolean>>({
     yt: true,
     x: true,
@@ -23,6 +24,7 @@ const PlatformsToggles = () => {
         ...prev,
         [platformId]: !prev[platformId],
       }));
+      // const platform=chrome.storage.local.set()
     }catch(e){
       toast.error("failed to perform operation");
     }
