@@ -119,7 +119,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   (async () => {
     try {
       console.log("[offscreen] evaluate_relativity message received", message);
-      const res = (await handleTransformerMessage(message.text, message.secondArgument)) ?? "sample";
+      const res = (await handleTransformerMessage(message.firstArgument,JSON.stringify(message.secondArgument))) ?? "sample";
       sendResponse(res);
     } catch (err) {
       console.log("[offscreen] evaluate_relativity failed", err);

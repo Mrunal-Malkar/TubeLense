@@ -1,6 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { CARD_DATA, type CardData } from "../lib/cards";
+import { initStore } from "../store/store";
+
 let creatingOffscreenDocument: Promise<void> | null = null;
+
+// initialize store and get the userPreffered topics
+const storePromise=initStore();
+const preference=(await storePromise).getState().preference
+let userPrefferedTopics:string[] | undefined = [];
+if(preference?.activeMode==="custom"){
+  userPrefferedTopics=preference?.custom.topics;
+}else{
+  const card=preference?.cards?.selectedCardName;
+  const Topics=CARD_DATA.find((cardProp:CardData)=>cardProp.name===card)?.topics;
+  userPrefferedTopics=Topics;
+}
 
 function getOffscreenDocumentPath(): string {
   return chrome.runtime.getURL("src//background/offscreen.html");
@@ -46,21 +61,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     async function call() {
       try {
         console.log("evaluate_relativity message received", message);
-
-        // const storageResult = await chrome.storage.local.get("user_preference_topics");
-        // const secondArgument = JSON.stringify(storageResult) ?? "car";
-        const secondArgument = "A video about automotive reviews, driving test drives, vehicle modifications, racing sports, car maintenance tutorials, or ownership experiences featuring specific brands, models, engines, and road performance.";
-        console.log("got the second argument:", secondArgument,"first argument:",);
-
         await ensureOffscreenDocument();
 
         // Forward to the offscreen document, which does the actual work.
         console.log("calling for offscreen")
+        if(!userPrefferedTopics){
+          throw Error("userPrefferedTopics is undefined, cannot evaluate relativity");
+        }
         const res = await chrome.runtime.sendMessage({
           target: "offscreen",
           task: "evaluate_relativity",
-          text: message.text,
-          secondArgument,
+          firstArgument: message.text,
+          secondArgument:userPrefferedTopics,
         });
 
         console.log("the final response of the model:", res);

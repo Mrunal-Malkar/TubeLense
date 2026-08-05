@@ -109,6 +109,9 @@ export const preferencesSlice = createSlice({
       action: PayloadAction<string>
     ) {
       state.cards.selectedCardName = action.payload;
+         if(state.activeMode!=="cards"){
+        state.activeMode="cards";
+      }
     },
 
     clearSelectedCard(state) {
