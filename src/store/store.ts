@@ -69,6 +69,7 @@ export async function initStore() {
 
     for (const key of Object.keys(reducers) as ReducerKey[]) {
       if (state[key] !== previousState[key]) {
+        console.log("the state key",state[key]);
         changed[key] = state[key] // pass the object directly, no JSON.stringify needed
       }
     }
