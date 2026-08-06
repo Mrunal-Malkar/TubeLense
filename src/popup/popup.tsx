@@ -3,10 +3,6 @@ import {
   Clock,
   EyeOff,
   ShieldCheck,
-  X,
-  Smile,
-  Plus,
-  Sparkles,
   Home,
   SlidersHorizontal,
   PieChart,
@@ -20,6 +16,7 @@ import { toggleActiveMode } from "../store/baseInfoStore";
 import { useState } from "react";
 import CardDrawer from "../components/cardDrawer";
 import { CARD_DATA, type CardData } from "../lib/cards";
+import Carousel from "../components/topicsCarousel";
 
 const ExtensionPopup = () => {
 
@@ -120,7 +117,7 @@ dispatch(toggleActiveMode());
       <PlatformsToggles />
 
       {/* --- FEED ALIGNMENT --- */}
-      <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+      {/* <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
         <h3 className="text-sm font-semibold mb-3">Feed Alignment</h3>
         <div className="flex items-center gap-3 mb-2">
           <div className="flex-1 h-2 bg-indigo-50 rounded-full overflow-hidden">
@@ -134,50 +131,9 @@ dispatch(toggleActiveMode());
         <p className="text-[10px] text-gray-500">
           Your feed is mostly aligned with your focus.
         </p>
-      </div>
+      </div> */}
 
-      {/* --- SMART SUGGESTIONS --- */}
-      <div className="flex flex-col gap-2 z-10">
-        <div className="flex justify-between items-center">
-          <h3 className="text-sm font-semibold">Smart Suggestions</h3>
-          <button className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800">
-            View All
-          </button>
-        </div>
-
-        {/* Scrollable Chips */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-          <div className="bg-white border border-gray-100 rounded-xl p-2.5 shrink-0 flex items-center gap-2 shadow-sm min-w-30">
-            <X size={16} className="text-indigo-400" />
-            <div>
-              <div className="text-[11px] font-semibold">Hide Cricket</div>
-              <div className="text-[9px] text-gray-400">Too much content</div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-100 rounded-xl p-2.5 shrink-0 flex items-center gap-2 shadow-sm min-w-30">
-            <Smile size={16} className="text-orange-400" />
-            <div>
-              <div className="text-[11px] font-semibold">Reduce Memes</div>
-              <div className="text-[9px] text-gray-400">Low value</div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-100 rounded-xl p-2.5 shrink-0 flex items-center gap-2 shadow-sm min-w-32.5">
-            <Plus size={16} className="text-emerald-500" />
-            <div>
-              <div className="text-[11px] font-semibold">Add System Design</div>
-              <div className="text-[9px] text-gray-400">High relevance</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* --- ACTION BUTTON --- */}
-      <button className="w-full mt-auto bg-linear-to-r from-indigo-400 to-purple-400 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-200/50 transition-all z-10 mb-12">
-        <Sparkles size={16} />
-        Apply Suggestions
-      </button>
+      <Carousel/>
 
       {/* --- BOTTOM NAVIGATION --- */}
       <div className="sticky bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 flex justify-around items-center z-20">
