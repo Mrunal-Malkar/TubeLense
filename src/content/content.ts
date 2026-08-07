@@ -108,9 +108,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }else if(namespace==="local" && changes.preference){
     const preferenceOld:any=changes.preference.oldValue;
     const preferenceNew:any=changes.preference.newValue;
-    if(preferenceNew.custom?.sites){
-      const sitesNew=preferenceNew?.custom?.sites;
-      const sitesOld=preferenceOld?.custom?.sites;
+    if(preferenceNew.sites){
+      const sitesNew=preferenceNew?.sites;
+      const sitesOld=preferenceOld?.sites;
       alterSitesProcessing({sitesNew,sitesOld});
     }else if(preferenceNew.cards?.selectedCardName){
     // 
@@ -118,7 +118,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-function alterSitesProcessing({sitesNew,sitesOld}:{sitesNew:PreferencesState["custom"]["sites"],sitesOld:PreferencesState["custom"]["sites"]}){
+function alterSitesProcessing({sitesNew,sitesOld}:{sitesNew:PreferencesState["sites"],sitesOld:PreferencesState["sites"]}){
   console.log("got the two arguments",{sitesNew,sitesOld});
   for (const site in sitesNew) {
     const siteKey = site as keyof typeof sitesNew;

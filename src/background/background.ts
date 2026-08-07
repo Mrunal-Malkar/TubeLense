@@ -4,7 +4,7 @@ import { CARD_DATA } from "../lib/cards";
 import { initStore } from "../store/store";
 
 let creatingOffscreenDocument: Promise<void> | null = null;
-
+let userPreferredTopics: string[] | undefined;
 // initialize store and get the userPreffered topics
 // const storePromise=initStore();
 // const preference=(await storePromise).getState().preference
@@ -59,21 +59,27 @@ async function ensureOffscreenDocument() {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.task === "evaluate_relativity") {
     (async () => {
-      try {
-        const preference = (await (await initStore()).getState()).preference;
-        const userPrefferedTopics: string[] | undefined =
+      if (!userPreferredTopics) {
+        const preference = ((await initStore()).getState()).preference;
+        userPreferredTopics =
           preference?.activeMode === "custom"
-            ? preference?.custom.topics
-            : CARD_DATA.find(c => c.name === preference?.cards?.selectedCardName)?.topics;
-
-        if (!userPrefferedTopics) throw new Error("userPrefferedTopics is undefined");
+            ? preference.topicsPack
+                .find((i) => i.label === preference.activeTopicPack)
+                ?.topics.map((t) => t.topic)
+            : CARD_DATA.find(
+                (c) => c.name === preference?.cards.selectedCardName,
+              )?.topics;
+      }
+      try {
+        if (!userPreferredTopics)
+          throw new Error("userPrefferedTopics is undefined");
 
         await ensureOffscreenDocument();
         const res = await chrome.runtime.sendMessage({
           target: "offscreen",
           task: "evaluate_relativity",
           firstArgument: message.text,
-          secondArgument: userPrefferedTopics,
+          secondArgument: userPreferredTopics,
         });
         sendResponse(res ?? "sample");
       } catch (err) {

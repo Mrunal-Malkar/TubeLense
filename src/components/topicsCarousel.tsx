@@ -7,6 +7,7 @@ import {
   useReducedMotion,
   type Variants,
 } from "motion/react";
+import { useSelector } from "react-redux";
 
 export interface CarouselSlide {
   id: string;

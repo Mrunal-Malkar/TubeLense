@@ -14,7 +14,7 @@ type PlatformOption = {
 const PlatformsToggles = () => {
   const dispatch=useDispatch();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const initials=useSelector((state:any)=>state.preference.custom.sites);
+  const initials=useSelector((state:any)=>state.preference.sites);
   const [platforms, setPlatforms] = useState<Record<PlatformId, boolean>>({
     yt: initials.yt,
     x: initials.x,
@@ -30,7 +30,8 @@ const PlatformsToggles = () => {
       }));
       dispatch(toggleSiteEnabled(platformId));
     }catch(e){
-      toast.error("failed to perform operation");
+      const Error=e instanceof ErrorEvent?true:false;
+      toast.error(`failed to perform operation ${Error?Error:":unexpected."}`);
     }
   };
 
