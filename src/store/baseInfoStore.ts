@@ -3,7 +3,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export interface PreferencesState {
   schemaVersion: number;
   activeMode: "custom" | "cards";
-  activeTopicPack:string;
+  activeTopicPack: string;
   focusScore: number;
   sites: {
     yt: boolean;
@@ -31,7 +31,7 @@ export interface TopicsPack {
 const initialState: PreferencesState = {
   schemaVersion: 1,
   activeMode: "custom",
-  activeTopicPack:"My Topics",
+  activeTopicPack: "My Topics",
   focusScore: 0,
 
   sites: {
@@ -87,13 +87,6 @@ export const preferencesSlice = createSlice({
       state.sites[action.payload] = !state.sites[action.payload];
     },
 
-    setActiveTopicPack(state,action:PayloadAction<{packLabel:string}>){
-      const isValid=state.topicsPack.find(i=>i.label==action.payload.packLabel)?true:false;
-      if(isValid){
-        state.activeTopicPack=action.payload.packLabel
-      }
-    },
-
     setAllSites(state, action: PayloadAction<PreferencesState["sites"]>) {
       state.sites = action.payload;
     },
@@ -110,22 +103,6 @@ export const preferencesSlice = createSlice({
         label: action.payload.label,
         topics: action.payload.topics ?? [],
       });
-    },
-
-    renamePack(
-      state,
-      action: PayloadAction<{
-        oldLabel: string;
-        newLabel: string;
-      }>,
-    ) {
-      const pack = state.topicsPack.find(
-        (p) => p.label === action.payload.oldLabel,
-      );
-
-      if (pack) {
-        pack.label = action.payload.newLabel;
-      }
     },
 
     removePack(
@@ -200,6 +177,73 @@ export const preferencesSlice = createSlice({
       return initialState;
     },
 
+    moveTopicUp(
+      state,
+      action: PayloadAction<{
+        targetPack: string;
+        index: number;
+      }>,
+    ) {
+      const pack = state.topicsPack.find(
+        (p) => p.label === action.payload.targetPack,
+      );
+
+      if (!pack) return;
+
+      const { index } = action.payload;
+
+      if (index <= 0 || index >= pack.topics.length) return;
+
+      [pack.topics[index - 1], pack.topics[index]] = [
+        pack.topics[index],
+        pack.topics[index - 1],
+      ];
+    },
+
+    moveTopicDown(
+      state,
+      action: PayloadAction<{
+        targetPack: string;
+        index: number;
+      }>,
+    ) {
+      const pack = state.topicsPack.find(
+        (p) => p.label === action.payload.targetPack,
+      );
+
+      if (!pack) return;
+
+      const { index } = action.payload;
+
+      if (index < 0 || index >= pack.topics.length - 1) return;
+
+      [pack.topics[index], pack.topics[index + 1]] = [
+        pack.topics[index + 1],
+        pack.topics[index],
+      ];
+    },
+
+    renamePack(
+      state,
+      action: PayloadAction<{
+        oldLabel: string;
+        newLabel: string;
+      }>,
+    ) {
+      const pack = state.topicsPack.find(
+        (p) => p.label === action.payload.oldLabel,
+      );
+
+      if (!pack) return;
+
+      pack.label = action.payload.newLabel;
+
+      // Keep active pack in sync
+      if (state.activeTopicPack === action.payload.oldLabel) {
+        state.activeTopicPack = action.payload.newLabel;
+      }
+    },
+
     renameTopic(
       state,
       action: PayloadAction<{
@@ -212,10 +256,25 @@ export const preferencesSlice = createSlice({
         (p) => p.label === action.payload.targetPack,
       );
 
-      const topic = pack?.topics.find((t) => t.id === action.payload.topicId);
+      if (!pack) return;
 
-      if (topic) {
-        topic.topic = action.payload.topic;
+      const topic = pack.topics.find((t) => t.id === action.payload.topicId);
+
+      if (!topic) return;
+
+      topic.topic = action.payload.topic;
+    },
+
+    setActiveTopicPack(state, action: PayloadAction<string>) {
+      const exists = state.topicsPack.some((p) => p.label === action.payload);
+
+      if (exists) {
+        state.activeTopicPack = action.payload;
+
+        // Optional: switching to a pack implies custom mode
+        if (state.activeMode !== "custom") {
+          state.activeMode = "custom";
+        }
       }
     },
   },
@@ -224,16 +283,16 @@ export const preferencesSlice = createSlice({
 export const {
   toggleActiveMode,
   setActiveMode,
-
+  moveTopicDown,
+  moveTopicUp,
   setSiteEnabled,
   toggleSiteEnabled,
   setAllSites,
-
   addPack,
   removePack,
   addTopicToTopicPack,
   removeTopic,
-
+  setActiveTopicPack,
   setSelectedCard,
   clearSelectedCard,
   renamePack,
