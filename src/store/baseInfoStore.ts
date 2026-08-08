@@ -1,4 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { CARD_DATA } from "../lib/cards";
+import { generateUUID } from "../functions/get";
 
 export interface PreferencesState {
   schemaVersion: number;
@@ -112,6 +114,10 @@ export const preferencesSlice = createSlice({
       state.topicsPack = state.topicsPack.filter(
         (pack) => pack.label !== action.payload,
       );
+
+      if (state.activeTopicPack === action.payload) {
+        state.activeTopicPack = state.topicsPack[0]?.label ?? "";
+      }
     },
 
     // Topics
@@ -163,9 +169,27 @@ export const preferencesSlice = createSlice({
     // Cards
     setSelectedCard(state, action: PayloadAction<string>) {
       state.cards.selectedCardName = action.payload;
-      if (state.activeMode !== "cards") {
+      const card = CARD_DATA.find((i) => i.name === action.payload);
+      if (!card) return;
+
+      const existingCardPackIndex = state.topicsPack.findIndex(
+        (pack) => pack.label === action.payload,
+      );
+      if (existingCardPackIndex >= 0) {
+        state.activeTopicPack = action.payload;
         state.activeMode = "cards";
+        return;
       }
+
+      const topics: Topic[] = card.topics.map((topic: string) => ({
+        id: generateUUID(),
+        topic,
+      }));
+
+      const newPack = { label: card.name, topics };
+      state.topicsPack.push(newPack);
+      state.activeTopicPack = newPack.label;
+      state.activeMode = "cards";
     },
 
     clearSelectedCard(state) {
@@ -265,6 +289,19 @@ export const preferencesSlice = createSlice({
       topic.topic = action.payload.topic;
     },
 
+    resetPackTopics(state, action: PayloadAction<string>) {
+      const pack = state.topicsPack.find((p) => p.label === action.payload);
+      if (!pack) return;
+
+      const card = CARD_DATA.find((item) => item.name === action.payload);
+      if (!card) return;
+
+      pack.topics = card.topics.map((topic) => ({
+        id: generateUUID(),
+        topic,
+      }));
+    },
+
     setActiveTopicPack(state, action: PayloadAction<string>) {
       const exists = state.topicsPack.some((p) => p.label === action.payload);
 
@@ -295,6 +332,7 @@ export const {
   setActiveTopicPack,
   setSelectedCard,
   clearSelectedCard,
+  resetPackTopics,
   renamePack,
   renameTopic,
   resetPreferences,

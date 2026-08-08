@@ -9,7 +9,9 @@ import {
   moveTopicUp,
   moveTopicDown,
   setActiveTopicPack,
+  resetPackTopics,
 } from "./../store/baseInfoStore";
+import { CARD_DATA } from "../lib/cards";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
@@ -78,6 +80,10 @@ export default function Carousel() {
   const activePack =
     packs.find((i: TopicsPack) => i.label === preference.activeTopicPack) ??
     packs[0];
+
+  const isCardPack = CARD_DATA.some(
+    (card) => card.name === activePack?.label,
+  );
 
   const currentTopics: Topic[] = activePack?.topics ?? [];
 
@@ -329,6 +335,18 @@ export default function Carousel() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-0.5">
+                            {isCardPack && (
+                              <button
+                                onClick={() => dispatch(resetPackTopics(activePack.label))}
+                                className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Reset Pack Topics"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M4.93 4.93a10 10 0 1 1-1.414 1.414" />
+                                  <path d="M4 4v5h5" />
+                                </svg>
+                              </button>
+                            )}
                             <button onClick={handleStartRenamePack} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Rename Pack">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </button>

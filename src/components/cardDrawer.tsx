@@ -72,97 +72,93 @@ export default function CardDrawer({
             {/* MAPPED CARDS */}
             <div className="flex flex-col gap-4 pb-8">
               {CARD_DATA.map((card) => {
-  const Icon = card.icon;
-  const isActive = currentCard === card.name;
-  const isExpanded = expandedCard === card.id;
+                const Icon = card.icon;
+                const isActive = currentCard === card.name;
+                const isExpanded = expandedCard === card.id;
 
-  return (
-    <motion.div
-      key={card.id}
-      layout
-      onClick={() => handleCardSelect(card)}
-      className={`
-        ${
-          isActive
-            ? "ring-2 ring-emerald-500"
-            : "opacity-85 hover:opacity-100"
-        }
+                return (
+                  <motion.div
+                    key={card.id}
+                    layout
+                    onClick={() => handleCardSelect(card)}
+                    className={`
+        ${isActive ? "ring-2 ring-emerald-500" : "opacity-85 hover:opacity-100"}
         bg-white rounded-2xl p-4
         shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]
         cursor-pointer transition-all duration-200
       `}
-    >
-      {/* ========================================================= */}
-      {/* MAIN CARD CONTENT — stays horizontal */}
-      {/* ========================================================= */}
+                  >
+                    {/* ========================================================= */}
+                    {/* MAIN CARD CONTENT — stays horizontal */}
+                    {/* ========================================================= */}
 
-      <div className="flex justify-between items-center">
-        {/* Left side */}
-        <div>
-          <h3 className="text-sm font-semibold mb-1 text-gray-700">
-            {card.title}
-          </h3>
+                    <div className="flex justify-between items-center">
+                      {/* Left side */}
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1 text-gray-700">
+                          {card.title}
+                        </h3>
 
-          <div className="flex items-center gap-2 mb-1">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: card.svgColor }}
-            />
+                        <div className="flex items-center gap-2 mb-1">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: card.svgColor }}
+                          />
 
-            <span className="font-bold text-sm text-gray-900">
-              {card.name}
-            </span>
-          </div>
+                          <span className="font-bold text-sm text-gray-900">
+                            {card.name}
+                          </span>
+                        </div>
 
-          <p className="text-[10px] text-gray-500">
-            {card.description}
-          </p>
-        </div>
+                        <p className="text-[10px] text-gray-500">
+                          {card.description}
+                        </p>
+                      </div>
 
-        {/* ===================================================== */}
-        {/* Right side */}
-        {/* ===================================================== */}
+                      {/* ===================================================== */}
+                      {/* Right side */}
+                      {/* ===================================================== */}
 
-        <div className="flex items-end gap-2">
-          {/* Decorative Squiggle */}
-          <svg
-            width="60"
-            height="20"
-            viewBox="0 0 60 20"
-            fill="none"
-            className="opacity-40"
-          >
-            <path
-              d="M0 10 Q 15 20, 30 10 T 60 10"
-              stroke={card.svgColor}
-              strokeWidth="2"
-              fill="transparent"
-            />
-          </svg>
+                      <div className="flex items-end gap-2">
+                        {/* Decorative Squiggle */}
+                        <svg
+                          width="60"
+                          height="20"
+                          viewBox="0 0 60 20"
+                          fill="none"
+                          className="opacity-40"
+                        >
+                          <path
+                            d="M0 10 Q 15 20, 30 10 T 60 10"
+                            stroke={card.svgColor}
+                            strokeWidth="2"
+                            fill="transparent"
+                          />
+                        </svg>
 
-          <div className="flex flex-col items-center gap-2">
-            {/* Icon */}
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: `${card.svgColor}15`,
-                color: card.svgColor,
-              }}
-            >
-              <Icon size={20} />
-            </div>
+                        <div className="flex flex-col items-center gap-2">
+                          {/* Icon */}
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center"
+                            style={{
+                              backgroundColor: `${card.svgColor}15`,
+                              color: card.svgColor,
+                            }}
+                          >
+                            <Icon size={20} />
+                          </div>
 
-            {/* Dropdown Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
+                          {/* Dropdown Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
 
-                setExpandedCard((prev) =>
-                  prev === card.id ? null : card.id,
-                );
-              }}
-              className={`
+                              setExpandedCard((prev) =>
+                                prev === card.id ? null : card.id,
+                              );
+                            }}
+                            className={`
                 rounded-full p-1.5
                 transition-all duration-200
                 ${
@@ -171,117 +167,118 @@ export default function CardDrawer({
                     : "text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                 }
               `}
-            >
-              <motion.svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                animate={{
-                  rotate: isExpanded ? 180 : 0,
-                }}
-                transition={{
-                  duration: 0.25,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-              >
-                <path
-                  d="m6 9 6 6 6-6"
-                  stroke="currentColor"
-                  strokeWidth="2.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </motion.svg>
-            </button>
-          </div>
-        </div>
-      </div>
+                          >
+                            <motion.svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              animate={{
+                                rotate: isExpanded ? 180 : 0,
+                              }}
+                              transition={{
+                                duration: 0.25,
+                                ease: [0.22, 1, 0.36, 1],
+                              }}
+                            >
+                              <path
+                                d="m6 9 6 6 6-6"
+                                stroke="currentColor"
+                                strokeWidth="2.3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </motion.svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
 
-      {/* ========================================================= */}
-      {/* TOPICS DROPDOWN — vertical */}
-      {/* ========================================================= */}
+                    {/* ========================================================= */}
+                    {/* TOPICS DROPDOWN — vertical */}
+                    {/* ========================================================= */}
 
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial={{
-              height: 0,
-              opacity: 0,
-              y: -6,
-            }}
-            animate={{
-              height: "auto",
-              opacity: 1,
-              y: 0,
-            }}
-            exit={{
-              height: 0,
-              opacity: 0,
-              y: -6,
-            }}
-            transition={{
-              duration: 0.28,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              
-              {/* Dropdown Header */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      backgroundColor: card.svgColor,
-                    }}
-                  />
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{
+                            height: 0,
+                            opacity: 0,
+                            y: -6,
+                          }}
+                          animate={{
+                            height: "auto",
+                            opacity: 1,
+                            y: 0,
+                          }}
+                          exit={{
+                            height: 0,
+                            opacity: 0,
+                            y: -6,
+                          }}
+                          transition={{
+                            duration: 0.28,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="overflow-hidden"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            {/* Dropdown Header */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-1.5 h-1.5 rounded-full"
+                                  style={{
+                                    backgroundColor: card.svgColor,
+                                  }}
+                                />
 
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                    Topics
-                  </span>
-                </div>
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                  Topics
+                                </span>
+                              </div>
 
-                <span className="text-[10px] font-semibold text-gray-400">
-                  {card.topics.length}{" "}
-                  {card.topics.length === 1 ? "topic" : "topics"}
-                </span>
-              </div>
+                              <span className="text-[10px] font-semibold text-gray-400">
+                                {card.topics.length}{" "}
+                                {card.topics.length === 1 ? "topic" : "topics"}
+                              </span>
+                            </div>
 
-              {/* Topics */}
-             {expandedCard==card.id && <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.045,
-                    },
-                  },
-                }}
-                className="flex flex-col gap-2"
-              >
-                {topics && card.topics.map((topic, index) => (
-                  <motion.div
-                    key={index}
-                    variants={{
-                      hidden: {
-                        opacity: 0,
-                        x: -8,
-                      },
-                      visible: {
-                        opacity: 1,
-                        x: 0,
-                      },
-                    }}
-                    transition={{
-                      duration: 0.2,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="
+                            {/* Topics */}
+                            {expandedCard == card.id && (
+                              <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                  hidden: {},
+                                  visible: {
+                                    transition: {
+                                      staggerChildren: 0.045,
+                                    },
+                                  },
+                                }}
+                                className="flex flex-col gap-2"
+                              >
+                                {topics &&
+                                  card.topics.map((topic, index) => (
+                                    <motion.div
+                                      key={index}
+                                      variants={{
+                                        hidden: {
+                                          opacity: 0,
+                                          x: -8,
+                                        },
+                                        visible: {
+                                          opacity: 1,
+                                          x: 0,
+                                        },
+                                      }}
+                                      transition={{
+                                        duration: 0.2,
+                                        ease: [0.22, 1, 0.36, 1],
+                                      }}
+                                      className="
                       group relative
                       flex items-center gap-3
                       rounded-xl
@@ -293,29 +290,30 @@ export default function CardDrawer({
                       hover:border-emerald-200
                       hover:shadow-[0_4px_14px_-6px_rgba(16,185,129,0.25)]
                     "
-                  >
-                    {/* Topic indicator */}
-                    <div
-                      className="flex-shrink-0 w-1.5 h-1.5 rounded-full transition-transform duration-200 group-hover:scale-125"
-                      style={{
-                        backgroundColor: card.svgColor,
-                      }}
-                    />
+                                    >
+                                      {/* Topic indicator */}
+                                      <div
+                                        className="flex-shrink-0 w-1.5 h-1.5 rounded-full transition-transform duration-200 group-hover:scale-125"
+                                        style={{
+                                          backgroundColor: card.svgColor,
+                                        }}
+                                      />
 
-                    {/* Topic text */}
-                    <span className="text-xs font-medium leading-relaxed text-gray-600 group-hover:text-gray-800">
-                      {topic}
-                    </span>
+                                      {/* Topic text */}
+                                      <span className="text-xs font-medium leading-relaxed text-gray-600 group-hover:text-gray-800">
+                                        {topic}
+                                      </span>
+                                    </motion.div>
+                                  ))}
+                              </motion.div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
-                ))}
-              </motion.div>}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-})}
+                );
+              })}
             </div>
           </motion.div>
         </>
