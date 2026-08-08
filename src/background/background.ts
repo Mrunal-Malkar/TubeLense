@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CARD_DATA } from "../lib/cards";
+import type { PreferencesState, TopicsPack } from "../store/baseInfoStore";
 import { initStore } from "../store/store";
 
 let creatingOffscreenDocument: Promise<void> | null = null;
@@ -56,24 +56,41 @@ async function ensureOffscreenDocument() {
   }
 }
 
+chrome.storage.onChanged.addListener(async (changes, areaName) => {
+  if (areaName !== "local") return;
+
+  const preferenceChange = changes.preference;
+  if (!preferenceChange) return;
+
+  const oldPref = preferenceChange.oldValue as PreferencesState | undefined;
+  const newPref = preferenceChange.newValue as PreferencesState | undefined;
+  if (!newPref) return;
+  if (oldPref?.activeTopicPack === newPref.activeTopicPack) return;
+
+  const preference: PreferencesState = (await initStore()).getState()
+    .preference;
+  const pack: TopicsPack = preference?.topicsPack.filter(
+    (i) => i.label == preference.activeTopicPack,
+  )?.[0];
+  userPreferredTopics = pack?.topics.map((i) => i.topic);
+});
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.task === "evaluate_relativity") {
     (async () => {
       if (!userPreferredTopics) {
-        const preference = ((await initStore()).getState()).preference;
-        userPreferredTopics =
-          preference?.activeMode === "custom"
-            ? preference.topicsPack
-                .find((i) => i.label === preference.activeTopicPack)
-                ?.topics.map((t) => t.topic)
-            : CARD_DATA.find(
-                (c) => c.name === preference?.cards.selectedCardName,
-              )?.topics;
+        const preference: PreferencesState = (await initStore()).getState()
+          .preference;
+        const pack: TopicsPack = preference?.topicsPack.filter(
+          (i) => i.label == preference.activeTopicPack,
+        )?.[0];
+        userPreferredTopics = pack.topics.map((i) => i.topic);
       }
       try {
         if (!userPreferredTopics)
           throw new Error("userPrefferedTopics is undefined");
 
+        console.log("the userPrefferedTopics:", userPreferredTopics);
         await ensureOffscreenDocument();
         const res = await chrome.runtime.sendMessage({
           target: "offscreen",

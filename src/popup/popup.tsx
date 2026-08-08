@@ -1,8 +1,8 @@
 import Header from "../components/header";
 import {
-  Clock,
-  EyeOff,
-  ShieldCheck,
+  // Clock,
+  // EyeOff,
+  // ShieldCheck,
   Home,
   SlidersHorizontal,
   PieChart,
@@ -11,12 +11,13 @@ import {
 import PlatformsToggles from "../components/toggle_platforms";
 import { ToastContainer } from "react-toastify";
 import FocusScoreAndAnimatedSphere from "../components/FocusScoreAndAnimatedSphere";
-import { useDispatch, useSelector } from "react-redux";
-import { toggleActiveMode } from "../store/baseInfoStore";
+// import { useDispatch, useSelector } from "react-redux";
+// import { toggleActiveMode } from "../store/baseInfoStore";
 import { useState } from "react";
 import CardDrawer from "../components/cardDrawer";
 import { CARD_DATA, type CardData } from "../lib/cards";
 import Carousel from "../components/topicsCarousel";
+import { useSelector } from "react-redux";
 
 const ExtensionPopup = () => {
 
@@ -26,7 +27,7 @@ const ExtensionPopup = () => {
 // });
 
 const [showConfirmCardClickPopup,setShowConfirmCardClickPopup]=useState<boolean>(false);
-const dispatch=useDispatch();
+// const dispatch=useDispatch();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const preference=useSelector((state: any)=>state.preference);
@@ -36,9 +37,9 @@ const baseCard:CardData | undefined=(CARD_DATA.filter((card) => card.name === St
 console.log("The baseCard",baseCard);
 const base_activeMode=preference.activeMode;
 
-function changeMode(){
-dispatch(toggleActiveMode());
-};
+// function changeMode(){
+// dispatch(toggleActiveMode());
+// };
 
 
 // if(error){
@@ -54,7 +55,7 @@ dispatch(toggleActiveMode());
       <FocusScoreAndAnimatedSphere />
 
       {/* --- TODAY'S IMPACT --- */}
-      <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+      {/* <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
         <h3 className="text-sm font-semibold mb-3">Today's Impact</h3>
         <div className="grid grid-cols-3 gap-2 divide-x divide-gray-100">
           <div className="flex flex-col items-center justify-center text-center">
@@ -75,7 +76,7 @@ dispatch(toggleActiveMode());
             <div className="text-[10px] text-gray-500 mt-1">Relevant Posts</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* --- CURRENT BRAIN MODE --- */}
       <div onClick={()=>setShowConfirmCardClickPopup(true)} className={`${base_activeMode=="cards"?"":"opacity-85"} cursor-pointer bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex justify-between items-center z-10`}>
