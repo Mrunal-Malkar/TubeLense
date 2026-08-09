@@ -1,49 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { extractYoutubeChannelName, extractYoutubeTitle } from "../functions/youtube_helper";
+import { YOUTUBE_VIDEO_SELECTORS } from "../lib/selectors";
 import { getRelativityScore } from "./content";
 
 let youtubeObserver: MutationObserver | null = null;
 let youtubeNavigateFinishHandler: (() => void) | null = null;
 
-// Every container type YouTube uses across Home, Search, Watch (related/sidebar),
-// Subscriptions, Channel pages, and Shorts shelves. YouTube changes these
-// periodically (the ongoing "Lockup" redesign) — if a video type still isn't
-// getting flagged, inspect it in devtools and add its tag name here.
-const YOUTUBE_VIDEO_SELECTORS = [
-  "ytd-rich-item-renderer", // Home page grid
-  "ytd-video-renderer", // Search results, many shelves
-  "ytd-compact-video-renderer", // Watch page sidebar / "related" list
-  "ytd-grid-video-renderer", // Channel / subscriptions grid (older layout)
-  "ytd-playlist-video-renderer", // Inside playlists
-  "ytd-playlist-panel-video-renderer", // Queue / "up next" panel
-  "ytd-reel-item-renderer", // Shorts shelf entries (legacy markup)
-  "yt-lockup-view-model", // New "Lockup" redesign — increasingly used everywhere
-].join(", ");
-
-// Multiple strategies for pulling a title out of a container, since old and
-// new (Lockup) renderer markup differ, and some elements expose title only
-// via aria-label before the visible text node is populated.
-const YOUTUBE_TITLE_SELECTORS = [
-  "#video-title",
-  "yt-formatted-string#video-title",
-  ".yt-lockup-metadata-view-model__heading-reset",
-  "h3 a",
-  "a#video-title-link",
-];
-
-export function extractYoutubeTitle(container: Element): string {
-  for (const sel of YOUTUBE_TITLE_SELECTORS) {
-    const el = container.querySelector(sel);
-    const text = el?.textContent?.trim();
-    if (text) return text;
-  }
-  // Fallback: the thumbnail/title anchor's aria-label often carries the full
-  // title (plus metadata) even before the visible title node has bound text.
-  const link = container.querySelector("a#thumbnail, a") as HTMLAnchorElement | null;
-  const label = link?.getAttribute("aria-label")?.trim();
-  if (label) return label;
-  return "";
-}
 
 export function debounce<T extends (...args: any[]) => void>(fn: T, waitMs: number) {
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -62,6 +24,7 @@ export async function processYoutubeVideos() {
     if (videoContainer.hasAttribute("data-extension-processing")) return;
 
     const currentTitle = extractYoutubeTitle(videoContainer);
+    const currentChannelName=extractYoutubeChannelName(videoContainer);
     if (!currentTitle) {
       // Title not rendered/bound yet (lazy-loaded tile). Don't mark it —
       // the next mutation batch (or debounced pass) will retry it.
@@ -76,12 +39,12 @@ export async function processYoutubeVideos() {
     if (previouslyScoredTitle === currentTitle) return;
 
     videoContainer.setAttribute("data-extension-processing", "true");
-    videoContainer.setAttribute("data-extension-title", currentTitle);
+    videoContainer.setAttribute("data-extension-signature", currentTitle);
 
     try {
-      const relativityScore = await getRelativityScore(currentTitle);
+      const relativityScore = await getRelativityScore(`${currentChannelName}:${currentTitle}`);
       (videoContainer as HTMLElement).style.display =
-        relativityScore <= 0.25 ? "none" : "";
+        relativityScore <= 0.1 ? "none" : "";
       // (videoContainer as HTMLElement).style.backgroundColor =
       //   relativityScore <= 0.25 ? "yellow" : "";
     } finally {
@@ -131,7 +94,7 @@ export function stopYoutubeFiltering() {
   document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS).forEach((el) => {
     // (el as HTMLElement).style.backgroundColor = "";
     (el as HTMLElement).style.display = "";
-    el.removeAttribute("data-extension-title");
+    el.removeAttribute("data-extension-signature");
     el.removeAttribute("data-extension-processing");
   });
 }

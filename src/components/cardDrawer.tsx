@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { CARD_DATA, type CardData } from "../lib/cards";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedCard } from "../store/baseInfoStore";
+import toast from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
 
 type cardType = {
   id: number;
@@ -30,20 +32,51 @@ export default function CardDrawer({
     );
     return card?.topics ?? null;
   }, [expandedCard]);
+
   const currentCard = useSelector(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (state: any) => state.preference.cards.selectedCardId,
   );
-  const handleCardSelect = (card: cardType) => {
-    // setActiveCard(card);
-    dispatch(setSelectedCard(card.name));
-    onClose();
+
+  const handleCardSelect = async (card: cardType) => {
+    try {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (!tab?.id) {
+        toast.error("No active tab found");
+        return;
+      }
+
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: "REBOOT_CURRENT_SITE",
+      });
+
+      if (response?.status !== "success") {
+        toast.error(response?.message || "Failed to update the current site");
+        return;
+      }
+
+      dispatch(setSelectedCard(card.name));
+
+      toast.success("Preference updated successfully");
+
+      onClose();
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        "Couldn't update this site. Make sure you're on a supported page.",
+      );
+    }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
+          <ToastContainer />
           {/* Dark Overlay Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
