@@ -120,7 +120,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 chrome.runtime.onMessage.addListener(
-  (message, sender, sendResponse) => {
+  (message, _sender, sendResponse) => {
     if (message.action === "REBOOT_CURRENT_SITE") {
       rebootCurrentSite()
         .then(() => {
