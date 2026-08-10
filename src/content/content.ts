@@ -3,19 +3,6 @@
 import { startYoutubeFiltering, stopYoutubeFiltering } from "./youtube";
 import { type PreferencesState } from "../store/baseInfoStore";
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("received the popup msg", message);
-  if (message.task == "activate_extension") {
-    console.log("activate_extension received", { senderUrl: sender?.url });
-    localStorage.setItem("lens_activate", "true");
-    console.log("lens_activation stored in localStorage");
-    sendResponse({ isActive: true, message: "done!" });
-  } else {
-    console.log("no such message", sender);
-  }
-  return true;
-});
-
 // --- Site Dispatch ---
 // Central place to route to the right site's filtering logic based on the
 // current page's hostname. Add a new `case` + real start/stop functions
@@ -206,8 +193,8 @@ async function rebootCurrentSite() {
 
   console.log(`Rebooting ${site}...`);
 
-  await startFunction();
-  await stopFunction();
+  await stopFunction()
+  await startFunction()
 
   console.log(`${site} reboot completed`);
 }

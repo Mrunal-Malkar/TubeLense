@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { extractYoutubeChannelName, extractYoutubeTitle } from "../functions/youtube_helper";
 import { YOUTUBE_VIDEO_SELECTORS } from "../lib/selectors";
+import { YOUTUBE_FILTERATION_SCORE } from "../lib/statics";
 import { getRelativityScore } from "./content";
 
 let youtubeObserver: MutationObserver | null = null;
@@ -43,10 +44,12 @@ export async function processYoutubeVideos() {
 
     try {
       const relativityScore = await getRelativityScore(`${currentChannelName}:${currentTitle}`);
-      (videoContainer as HTMLElement).style.display =
-        relativityScore <= 0.1 ? "none" : "";
-      // (videoContainer as HTMLElement).style.backgroundColor =
-      //   relativityScore <= 0.25 ? "yellow" : "";
+      // (videoContainer as HTMLElement).style.display =
+      //   relativityScore <= 0.1 ? "none" : "";
+      console.log("coloring the video if i should",relativityScore);
+      (videoContainer as HTMLElement).style.backgroundColor =
+        relativityScore <= YOUTUBE_FILTERATION_SCORE ? "yellow" : "";
+        console.log("did what i should,check:",relativityScore<=YOUTUBE_FILTERATION_SCORE);
     } finally {
       videoContainer.removeAttribute("data-extension-processing");
     }
@@ -92,8 +95,8 @@ export function stopYoutubeFiltering() {
     youtubeNavigateFinishHandler = null;
   }
   document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS).forEach((el) => {
-    // (el as HTMLElement).style.backgroundColor = "";
-    (el as HTMLElement).style.display = "";
+    (el as HTMLElement).style.backgroundColor = "";
+    // (el as HTMLElement).style.display = "";
     el.removeAttribute("data-extension-signature");
     el.removeAttribute("data-extension-processing");
   });
