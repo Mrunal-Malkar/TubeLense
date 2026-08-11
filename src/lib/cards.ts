@@ -39,13 +39,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "emerald",
     svgColor: "#10b981",
     topics: [
-      "A clear, step-by-step tutorial that teaches a practical skill.",
-      "An in-depth technical explanation written without any clickbait.",
-      "A concise summary of new research findings and their implications.",
-      "A well-sourced news update reported in a neutral, factual tone.",
-      "A thoughtful how-to guide for solving a specific problem.",
-      "An educational thread that breaks down a complex topic simply."
-    ]
+      "A practical tutorial that teaches a useful skill clearly.",
+    ],
   },
   {
     id: 2,
@@ -56,13 +51,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "amber",
     svgColor: "#f59e0b",
     topics: [
-      "A high-intensity workout routine designed to get your heart pumping.",
-      "An exciting highlight clip from a live sports match.",
-      "A fast-paced motivational speech meant to fire you up.",
-      "An upbeat playlist recommendation for pushing through a tough day.",
-      "A thrilling recap of an action-packed event.",
-      "A burst of hype and excitement about an upcoming release."
-    ]
+      "An exciting video that creates energy, motivation, or hype.",
+    ],
   },
   {
     id: 3,
@@ -73,13 +63,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "indigo",
     svgColor: "#6366f1",
     topics: [
-      "A slow, calming video of rain falling outside a window.",
-      "A gentle guided meditation to help you fall asleep.",
-      "Soft ambient music meant for winding down after a long day.",
-      "A peaceful nature scene with birdsong and quiet scenery.",
-      "A cozy bedtime story read in a soothing voice.",
-      "A relaxing tour through a quiet, softly lit space."
-    ]
+      "A calming video that helps you relax and wind down.",
+    ],
   },
   {
     id: 4,
@@ -90,13 +75,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "pink",
     svgColor: "#ec4899",
     topics: [
-      "A silly meme that makes you laugh out loud.",
-      "A lighthearted joke or pun shared just for fun.",
-      "A funny video of a pet doing something unexpected.",
-      "A playful challenge or game trending among friends.",
-      "A witty one-liner poking fun at everyday life.",
-      "A goofy skit meant purely to entertain."
-    ]
+      "A funny video that entertains without requiring serious thought.",
+    ],
   },
   {
     id: 5,
@@ -107,13 +87,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "violet",
     svgColor: "#8b5cf6",
     topics: [
-      "A long-form essay exploring a big question about life or society.",
-      "A thoughtful reflection on an ethical dilemma.",
-      "An in-depth analysis connecting history to the present moment.",
-      "A nuanced argument that weighs multiple perspectives carefully.",
-      "A reflective piece examining the meaning behind an everyday experience.",
-      "A well-reasoned essay that challenges a common assumption."
-    ]
+      "A thoughtful discussion exploring deep questions and ideas.",
+    ],
   },
   {
     id: 6,
@@ -124,13 +99,8 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "sky",
     svgColor: "#0ea5e9",
     topics: [
-      "A calm discussion of a topic that avoids political arguments.",
-      "A neutral explainer that presents facts without taking sides.",
-      "A peaceful community update with no inflammatory language.",
-      "A friendly conversation free of outrage or conflict.",
-      "A balanced piece that steers clear of hot-button controversies.",
-      "A quiet, drama-free update from a hobby or interest group."
-    ]
+      "A neutral discussion that explains a topic without controversy.",
+    ],
   },
   {
     id: 7,
@@ -141,12 +111,7 @@ export const CARD_DATA: CardData[] = [
     colorTheme: "teal",
     svgColor: "#14b8a6",
     topics: [
-      "A fascinating fact about a topic you've never encountered before.",
-      "An unexpected discovery from a completely different field.",
-      "A surprising story from a culture or place far from your own.",
-      "A curious deep dive into an obscure hobby or niche interest.",
-      "An eye-opening perspective from outside your usual interests.",
-      "A serendipitous find that broadens what you usually see."
-    ]
-  }
+      "A fascinating discovery that introduces something new or unexpected.",
+    ],
+  },
 ];
