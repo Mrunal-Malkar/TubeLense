@@ -7,6 +7,7 @@ export interface PreferencesState {
   activeMode: "custom" | "cards";
   activeTopicPack: string;
   focusScore: number;
+  strictness:"relaxed"|"balanced"|"strict";
   sites: {
     yt: boolean;
     insta: boolean;
@@ -35,6 +36,7 @@ const initialState: PreferencesState = {
   activeMode: "custom",
   activeTopicPack: "My Topics",
   focusScore: 0,
+  strictness:"balanced",
 
   sites: {
     yt: true,
@@ -80,6 +82,11 @@ export const preferencesSlice = createSlice({
       }>,
     ) {
       state.sites[action.payload.site] = action.payload.enabled;
+    },
+    setStrictness(state,action:PayloadAction<string>){
+      if(state.strictness!=action.payload && (action.payload=="relaxed" || action.payload=="balanced" || action.payload=="strict")){
+        state.strictness=action.payload;
+      }
     },
 
     toggleSiteEnabled(
@@ -325,6 +332,7 @@ export const {
   setSiteEnabled,
   toggleSiteEnabled,
   setAllSites,
+  setStrictness,
   addPack,
   removePack,
   addTopicToTopicPack,

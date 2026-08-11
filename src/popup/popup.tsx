@@ -18,6 +18,7 @@ import CardDrawer from "../components/cardDrawer";
 import { CARD_DATA, type CardData } from "../lib/cards";
 import Carousel from "../components/topicsCarousel";
 import { useSelector } from "react-redux";
+import StrictnessToggle from "../components/strictnessToggle";
 
 const ExtensionPopup = () => {
 
@@ -114,6 +115,7 @@ const base_activeMode=preference.activeMode;
           </div>
         </div>
       </div>
+      <StrictnessToggle/>
 
       <PlatformsToggles />
 

@@ -85,7 +85,9 @@ chrome.storage.local.get(["lens_active"], (result) => {
 // --- Listen for Real-time Changes (from Popup) ---
 chrome.storage.onChanged.addListener((changes, namespace) => {
   console.log("storage changed", { namespace, changes });
-  if (namespace === "local" && changes.lens_active) {
+  if (namespace != "local") return;
+
+  if (changes.lens_active) {
     if (changes.lens_active.newValue == true) {
       console.log("starting the filtering.");
       startFilteringForCurrentSite();
@@ -93,44 +95,44 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       console.log("stopping the filtering", changes.lens_active);
       stopFilteringForCurrentSite();
     }
-  } else if (namespace === "local" && changes.preference) {
+  } else if (changes.preference) {
     const preferenceOld: any = changes.preference.oldValue;
     const preferenceNew: any = changes.preference.newValue;
     if (preferenceNew.sites) {
       const sitesNew = preferenceNew?.sites;
       const sitesOld = preferenceOld?.sites;
       alterSitesProcessing({ sitesNew, sitesOld });
-    } else if (preferenceNew.cards?.selectedCardName) {
-      //
+    }
+    if(preferenceNew.strictness){
+      console.log("rebooting the site...")
+      rebootCurrentSite();
     }
   }
 });
 
-chrome.runtime.onMessage.addListener(
-  (message, _sender, sendResponse) => {
-    if (message.action === "REBOOT_CURRENT_SITE") {
-      rebootCurrentSite()
-        .then(() => {
-          sendResponse({
-            status: "success",
-            message: "Current site rebooted successfully",
-          });
-        })
-        .catch((error) => {
-          console.error("Reboot failed:", error);
-
-          sendResponse({
-            status: "error",
-            message: "Failed to reboot current site",
-          });
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.action === "REBOOT_CURRENT_SITE") {
+    rebootCurrentSite()
+      .then(() => {
+        sendResponse({
+          status: "success",
+          message: "Current site rebooted successfully",
         });
+      })
+      .catch((error) => {
+        console.error("Reboot failed:", error);
 
-      return true;
-    }
+        sendResponse({
+          status: "error",
+          message: "Failed to reboot current site",
+        });
+      });
 
-    return false;
-  },
-);
+    return true;
+  }
+
+  return false;
+});
 
 function alterSitesProcessing({
   sitesNew,
@@ -193,8 +195,8 @@ async function rebootCurrentSite() {
 
   console.log(`Rebooting ${site}...`);
 
-  await stopFunction()
-  await startFunction()
+  await stopFunction();
+  await startFunction();
 
   console.log(`${site} reboot completed`);
 }

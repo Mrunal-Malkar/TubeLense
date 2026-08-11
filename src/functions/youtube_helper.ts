@@ -1,4 +1,5 @@
 import { YOUTUBE_CHANNEL_SELECTORS, YOUTUBE_TITLE_SELECTORS } from "../lib/selectors";
+import { BALANCED_STRICTNESS_SCORE, RELAXED_STRICTNESS_SCORE, STRICT_STRICTNESS_SCORE } from "../lib/statics";
 
 export function extractYoutubeChannelName(container: Element): string {
   for (const sel of YOUTUBE_CHANNEL_SELECTORS) {
@@ -24,4 +25,17 @@ export function extractYoutubeTitle(container: Element): string {
   const label = link?.getAttribute("aria-label")?.trim();
   if (label) return label;
   return "";
+}
+
+export function youtubeFilterationCheck(relativityScore:number,userPreferredStrictness:string){
+ console.log("yoututbe filteration check helper,relativityScore;",relativityScore,"userPrefferedStrictness:",userPreferredStrictness)
+  switch(userPreferredStrictness){
+    case "relaxed":
+      return relativityScore<RELAXED_STRICTNESS_SCORE
+    case "balanced":
+      return relativityScore<BALANCED_STRICTNESS_SCORE
+    case "strict":
+      return relativityScore<STRICT_STRICTNESS_SCORE
+  }
+  
 }

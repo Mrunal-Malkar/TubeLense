@@ -1,12 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { extractYoutubeChannelName, extractYoutubeTitle } from "../functions/youtube_helper";
+import { extractYoutubeChannelName, extractYoutubeTitle, youtubeFilterationCheck } from "../functions/youtube_helper";
 import { YOUTUBE_VIDEO_SELECTORS } from "../lib/selectors";
-import { YOUTUBE_FILTERATION_SCORE } from "../lib/statics";
+import type { PreferencesState } from "../store/baseInfoStore";
 import { getRelativityScore } from "./content";
 
 let youtubeObserver: MutationObserver | null = null;
 let youtubeNavigateFinishHandler: (() => void) | null = null;
+let userPrefferedStrictness:string;
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace !== "local") return;
+
+  const preference = changes.preference?.newValue as PreferencesState;
+  console.log("youtube.ts message event preference:",preference)
+  if (preference) {
+    userPrefferedStrictness = preference.strictness;
+  }
+});
 
 export function debounce<T extends (...args: any[]) => void>(fn: T, waitMs: number) {
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -44,12 +54,18 @@ export async function processYoutubeVideos() {
 
     try {
       const relativityScore = await getRelativityScore(`${currentChannelName}:${currentTitle}`);
-      // (videoContainer as HTMLElement).style.display =
-      //   relativityScore <= 0.1 ? "none" : "";
+      if(!userPrefferedStrictness){
+      const result = await chrome.storage.local.get("preference");
+      const preference = result.preference as PreferencesState
+      userPrefferedStrictness = preference?.strictness ?? "balanced"; // or whatever default you want
+      console.log("userPreferredStrictness",userPrefferedStrictness);
+      }
+      const check=youtubeFilterationCheck(relativityScore,userPrefferedStrictness);  
       console.log("coloring the video if i should",relativityScore);
-      (videoContainer as HTMLElement).style.backgroundColor =
-        relativityScore <= YOUTUBE_FILTERATION_SCORE ? "yellow" : "";
-        console.log("did what i should,check:",relativityScore<=YOUTUBE_FILTERATION_SCORE);
+      // (videoContainer as HTMLElement).style.display =
+      //   check ? "none" : "";
+      (videoContainer as HTMLElement).style.backgroundColor=check? "yellow" : "";
+        console.log("did what i should,check:",check);
     } finally {
       videoContainer.removeAttribute("data-extension-processing");
     }
