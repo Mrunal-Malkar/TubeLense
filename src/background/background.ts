@@ -133,6 +133,9 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+   if (message?.target === "offscreen") {
+    return false;
+  }
   if (message?.task === "evaluate_relativity") {
     (async () => {
       if (!userPreferredTopics && !isStandardCard) {
