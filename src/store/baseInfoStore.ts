@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { CARD_DATA } from "../lib/cards";
+import { CARD_DATA, CARD_NAME } from "../lib/cards";
 import { generateUUID } from "../functions/get";
 
 export interface PreferencesState {
@@ -55,7 +55,7 @@ const initialState: PreferencesState = {
   ],
 
   cards: {
-    selectedCardName: "Energy Boost",
+    selectedCardName: CARD_NAME.ENERGY_BOOST,
   },
 };
 

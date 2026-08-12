@@ -37,6 +37,7 @@ console.log("preference",preference);
 const baseCard:CardData | undefined=(CARD_DATA.filter((card) => card.name === String(preference.cards.selectedCardName))[0]);
 console.log("The baseCard",baseCard);
 const base_activeMode=preference.activeMode;
+console.log("active pack:",preference.activeTopicPack)
 
 // function changeMode(){
 // dispatch(toggleActiveMode());

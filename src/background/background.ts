@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { CARD_DATA } from "../lib/cards";
 import type { PreferencesState, TopicsPack } from "../store/baseInfoStore";
 import { initStore } from "../store/store";
 
 let creatingOffscreenDocument: Promise<void> | null = null;
-let userPreferredTopics: string | undefined;
+let userPreferredTopics: string[] | undefined;
+let isStandardCard: boolean;
+let cardName: string | undefined;
 
 // Resolves once the offscreen document has told us it's actually listening.
 let offscreenReady: Promise<void> | null = null;
@@ -114,35 +117,64 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
 
   const preference: PreferencesState = (await initStore()).getState()
     .preference;
-  const pack: TopicsPack = preference?.topicsPack.filter(
-    (i) => i.label == preference.activeTopicPack,
-  )?.[0];
+  const pack: TopicsPack | undefined = preference?.topicsPack.find(
+    (i) => i.label === preference.activeTopicPack,
+  );
 
-  userPreferredTopics = pack?.topics.map((i) => i.topic).join(",");
+  if (pack && CARD_DATA.some((i) => i.name === pack.label)) {
+    cardName = pack.label;
+    isStandardCard = true;
+    userPreferredTopics = undefined;
+  } else {
+    isStandardCard = false;
+    cardName = undefined;
+    userPreferredTopics = pack?.topics.map((topic) => topic.topic);
+  }
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.task === "evaluate_relativity") {
     (async () => {
-      if (!userPreferredTopics) {
+      if (!userPreferredTopics && !isStandardCard) {
         const preference: PreferencesState = (await initStore()).getState()
           .preference;
-        const pack: TopicsPack = preference?.topicsPack.filter(
-          (i) => i.label == preference.activeTopicPack,
-        )?.[0];
-        userPreferredTopics = pack?.topics.map((i) => i.topic).join(",");
+        const pack: TopicsPack | undefined = preference?.topicsPack.find(
+          (i) => i.label === preference.activeTopicPack,
+        );
+
+        if (pack && CARD_DATA.some((i) => i.name === pack.label)) {
+          cardName = pack.label;
+          isStandardCard = true;
+          userPreferredTopics = undefined;
+        } else {
+          isStandardCard = false;
+          cardName = undefined;
+          userPreferredTopics = pack?.topics.map((topic) => topic.topic);
+        }
       }
       try {
-        if (!userPreferredTopics) {
-          throw new Error("userPreferredTopics is undefined");
+        await ensureOffscreenDocument();
+
+        if (isStandardCard && cardName) {
+          const res = await sendToOffscreen({
+            target: "offscreen",
+            task: "evaluate_relativity",
+            title: message.text,
+            standardCardName: cardName,
+          });
+          sendResponse(res);
+          return;
         }
 
-        await ensureOffscreenDocument();
+        if (!userPreferredTopics || userPreferredTopics.length === 0) {
+          throw new Error("userPreferredTopics is undefined or empty");
+        }
+
         const res = await sendToOffscreen({
           target: "offscreen",
           task: "evaluate_relativity",
-          firstArgument: message.text,
-          secondArgument: userPreferredTopics,
+          title: message.text,
+          customTopics: userPreferredTopics,
         });
         sendResponse(res);
       } catch (err) {
