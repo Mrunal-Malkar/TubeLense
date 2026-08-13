@@ -4,6 +4,8 @@ import { CARD_DATA } from "../lib/cards";
 import type { PreferencesState, TopicsPack } from "../store/baseInfoStore";
 import { initStore } from "../store/store";
 
+console.log("background.ts loaded", { href: location.href });
+
 let creatingOffscreenDocument: Promise<void> | null = null;
 let userPreferredTopics: string[] | undefined;
 let isStandardCard: boolean;
@@ -23,12 +25,19 @@ async function hasOffscreenDocument(): Promise<boolean> {
       contextTypes: ["OFFSCREEN_DOCUMENT"],
       documentUrls: [getOffscreenDocumentPath()],
     });
+    try {
+      console.log("hasOffscreenDocument contexts length", contexts.length);
+    } catch (e) {
+      /* ignore */
+      console.log("error in hasOffscreenDocument context length:",e);
+    }
     return contexts.length > 0;
   }
   return false;
 }
 
 function resetReadyGate() {
+  console.log("resetReadyGate called");
   offscreenReady = new Promise((resolve) => {
     resolveOffscreenReady = resolve;
   });
@@ -62,6 +71,7 @@ async function ensureOffscreenDocument() {
 
   try {
     await creatingOffscreenDocument;
+    console.log("created offscreen document");
   } finally {
     creatingOffscreenDocument = null;
   }
@@ -95,8 +105,10 @@ async function sendToOffscreen(payload: any, attempts = 3): Promise<any> {
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await chrome.runtime.sendMessage(payload);
+      if (res === undefined) console.log("sendToOffscreen got undefined response, attempt", i + 1);
       if (res !== undefined) return res;
     } catch (err) {
+      console.log("sendToOffscreen attempt failed", i + 1, err);
       if (i === attempts - 1) throw err;
     }
     await new Promise((r) => setTimeout(r, 300 * (i + 1)));
@@ -105,6 +117,7 @@ async function sendToOffscreen(payload: any, attempts = 3): Promise<any> {
 }
 
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
+  console.log("background storage.onChanged", { changes, areaName });
   if (areaName !== "local") return;
 
   const preferenceChange = changes.preference;
@@ -133,6 +146,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  console.log("background onMessage received", message);
    if (message?.target === "offscreen") {
     return false;
   }

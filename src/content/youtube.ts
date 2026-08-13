@@ -8,6 +8,8 @@ import { YOUTUBE_VIDEO_SELECTORS } from "../lib/selectors";
 import type { PreferencesState } from "../store/baseInfoStore";
 import { getRelativityScore } from "./content";
 
+console.log("youtube.ts loaded", { href: location.href });
+
 let youtubeObserver: MutationObserver | null = null;
 let youtubeNavigateFinishHandler: (() => void) | null = null;
 let userPrefferedStrictness: string;
@@ -29,6 +31,12 @@ export function debounce<T extends (...args: any[]) => void>(
 ) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   return (...args: Parameters<T>) => {
+    try {
+      console.log("debounce called", { waitMs, args });
+    } catch (e) {
+      /* ignore logging errors */
+      console.log("debounce error",e)
+    }
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => fn(...args), waitMs);
   };
@@ -41,11 +49,24 @@ function getTopLevelVideoElements(): Element[] {
   );
 }
 
+// Log discovery of top-level video elements
+try {
+  const _ = getTopLevelVideoElements();
+  console.log("getTopLevelVideoElements initial count", _.length);
+} catch (e) {
+  /* ignore during initialization */
+  console.log("getTopLevelVideoElements error",e);
+}
+
 // --- Core Logic ---
 export async function processYoutubeVideos() {
   const videoElements = getTopLevelVideoElements();
+  console.log("processYoutubeVideos - found videoElements", videoElements.length, {
+    scoredThisPassSize: scoredThisPass.size,
+  });
 
   videoElements.forEach(async (videoContainer) => {
+    console.log("processing videoContainer", videoContainer.nodeName);
     // Prevent overlapping async passes on the same node.
     if (videoContainer.hasAttribute("data-extension-processing")) return;
 
@@ -54,6 +75,7 @@ export async function processYoutubeVideos() {
     if (!currentTitle) {
       // Title not rendered/bound yet (lazy-loaded tile). Don't mark it —
       // the next mutation batch (or debounced pass) will retry it.
+      console.log("processYoutubeVideos - title not ready for", currentChannelName, videoContainer);
       return;
     }
 
@@ -66,20 +88,22 @@ export async function processYoutubeVideos() {
     );
     if (previouslyScoredTitle === currentTitle) return;
     const key = `${currentChannelName}:${currentTitle}`; // same key you use for scoring
-
+    console.log("this is the key",key);
     if (scoredThisPass.has(key)) {
       const cached = scoredThisPass.get(key)!;
       (videoContainer as HTMLElement).style.backgroundColor = cached.check
         ? "yellow"
         : "";
       videoContainer.setAttribute("data-extension-title", currentTitle);
+      console.log("reused cached score for", key, cached);
       return; // skip the actual model call, reuse the result
     }
     videoContainer.setAttribute("data-extension-processing", "true");
     videoContainer.setAttribute("data-extension-signature", currentTitle);
+    console.log("marked video as processing", key);
 
     try {
-      console.log("this is the quee",scoredThisPass);
+      console.log("this is the quee", scoredThisPass);
       const relativityScore = await getRelativityScore(
         `${currentChannelName}:${currentTitle}`,
       );
@@ -89,12 +113,10 @@ export async function processYoutubeVideos() {
         userPrefferedStrictness = preference?.strictness ?? "balanced"; // or whatever default you want
         console.log("userPreferredStrictness", userPrefferedStrictness);
       }
-      const check = youtubeFilterationCheck(
-        relativityScore,
-        userPrefferedStrictness,
-      )??false;
-scoredThisPass.set(key, { score: relativityScore, check });
-      console.log("coloring the video if i should", relativityScore);
+      const check =
+        youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ?? false;
+      scoredThisPass.set(key, { score: relativityScore, check });
+      console.log("coloring the video if i should", relativityScore, { key, check });
       // (videoContainer as HTMLElement).style.display = check ? "none" : "";
       (videoContainer as HTMLElement).style.backgroundColor = check
         ? "yellow"

@@ -31,6 +31,13 @@ export interface TopicsPack {
   topics: Topic[];
 }
 
+export interface Sites{
+  yt:boolean,
+  insta:boolean,
+  x:boolean,
+  google:boolean
+}
+
 const initialState: PreferencesState = {
   schemaVersion: 1,
   activeMode: "custom",
