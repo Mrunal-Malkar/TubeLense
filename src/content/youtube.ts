@@ -15,6 +15,59 @@ let youtubeNavigateFinishHandler: (() => void) | null = null;
 let userPrefferedStrictness: string;
 const scoredThisPass = new Map<string, { score: number; check: boolean }>();
 
+// --- NEW: visibility-gated scoring ---
+let intersectionObserver: IntersectionObserver | null = null;
+
+const PENDING_STYLE = {
+  opacity: "0.15",
+  filter: "blur(6px)",
+  transition: "opacity 0.25s ease, filter 0.25s ease",
+};
+
+function applyPendingStyle(el: HTMLElement) {
+  el.style.transition = PENDING_STYLE.transition;
+  el.style.opacity = PENDING_STYLE.opacity;
+  el.style.filter = PENDING_STYLE.filter;
+}
+
+function applyRevealStyle(el: HTMLElement, check: boolean) {
+  if (check) {
+    // stays hidden — fade out fully instead of the old instant display:none
+    el.style.opacity = "0";
+    el.style.filter = "blur(6px)";
+    // display:none after the fade finishes so it stops taking layout space
+    setTimeout(() => {
+      el.style.display = "none";
+    }, 220);
+  } else {
+    el.style.display = "";
+    el.style.opacity = "1";
+    el.style.filter = "";
+  }
+}
+
+function getIntersectionObserver(): IntersectionObserver {
+  if (intersectionObserver) return intersectionObserver;
+
+  intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        intersectionObserver!.unobserve(el); // score once, then stop watching
+        scoreVideoElement(el);
+      }
+    },
+    {
+      root: null, // viewport
+      rootMargin: "400px 0px", // start scoring ~400px before it's actually visible
+      threshold: 0,
+    },
+  );
+
+  return intersectionObserver;
+}
+
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") return;
 
@@ -31,12 +84,6 @@ export function debounce<T extends (...args: any[]) => void>(
 ) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   return (...args: Parameters<T>) => {
-    try {
-      console.log("debounce called", { waitMs, args });
-    } catch (e) {
-      /* ignore logging errors */
-      console.log("debounce error",e)
-    }
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => fn(...args), waitMs);
   };
@@ -49,82 +96,81 @@ function getTopLevelVideoElements(): Element[] {
   );
 }
 
-// Log discovery of top-level video elements
-try {
-  const _ = getTopLevelVideoElements();
-  console.log("getTopLevelVideoElements initial count", _.length);
-} catch (e) {
-  /* ignore during initialization */
-  console.log("getTopLevelVideoElements error",e);
+// --- NEW: the actual scoring logic, now only invoked once an element is
+// about to be visible (called from the IntersectionObserver callback) ---
+async function scoreVideoElement(videoContainer: Element) {
+  if (videoContainer.hasAttribute("data-extension-processing")) return;
+
+  const currentTitle = extractYoutubeTitle(videoContainer);
+  const currentChannelName = extractYoutubeChannelName(videoContainer);
+  if (!currentTitle) return; // title still not bound — just drop it, discovery pass will re-catch it later
+
+  const previouslyScoredTitle = videoContainer.getAttribute("data-extension-title");
+  if (previouslyScoredTitle === currentTitle) return;
+
+  const key = `${currentChannelName}:${currentTitle}`;
+  const el = videoContainer as HTMLElement;
+
+  if (scoredThisPass.has(key)) {
+    const cached = scoredThisPass.get(key)!;
+    applyRevealStyle(el, cached.check);
+    videoContainer.setAttribute("data-extension-title", currentTitle);
+    return;
+  }
+
+  videoContainer.setAttribute("data-extension-processing", "true");
+  videoContainer.setAttribute("data-extension-signature", currentTitle);
+  videoContainer.setAttribute("data-extension-title", currentTitle);
+
+  try {
+    const relativityScore = await getRelativityScore(key);
+
+    if (!userPrefferedStrictness) {
+      const result = await chrome.storage.local.get("preference");
+      const preference = result.preference as PreferencesState;
+      userPrefferedStrictness = preference?.strictness ?? "balanced";
+    }
+
+    const check = youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ?? false;
+    scoredThisPass.set(key, { score: relativityScore, check });
+    applyRevealStyle(el, check);
+  } finally {
+    videoContainer.removeAttribute("data-extension-processing");
+  }
 }
 
-// --- Core Logic ---
-export async function processYoutubeVideos() {
+// --- Discovery pass: finds new video nodes, blurs them immediately, and
+// hands them to the IntersectionObserver instead of scoring right away ---
+export function processYoutubeVideos() {
   const videoElements = getTopLevelVideoElements();
-  console.log("processYoutubeVideos - found videoElements", videoElements.length, {
-    scoredThisPassSize: scoredThisPass.size,
-  });
+  const observer = getIntersectionObserver();
 
-  videoElements.forEach(async (videoContainer) => {
-    console.log("processing videoContainer", videoContainer.nodeName);
-    // Prevent overlapping async passes on the same node.
-    if (videoContainer.hasAttribute("data-extension-processing")) return;
+  videoElements.forEach((videoContainer) => {
+    // already discovered & being watched/scored — skip
+    if (videoContainer.hasAttribute("data-extension-observed")) return;
 
     const currentTitle = extractYoutubeTitle(videoContainer);
+    if (!currentTitle) return; // not rendered yet, next pass will catch it
+
+    videoContainer.setAttribute("data-extension-observed", "true");
+
+    const el = videoContainer as HTMLElement;
+
+    // If we already have a cached score from this pass (e.g. duplicate
+    // shelf entry for a video we already scored), apply it instantly —
+    // no need to blur-then-reveal for something we already know about.
     const currentChannelName = extractYoutubeChannelName(videoContainer);
-    if (!currentTitle) {
-      // Title not rendered/bound yet (lazy-loaded tile). Don't mark it —
-      // the next mutation batch (or debounced pass) will retry it.
-      console.log("processYoutubeVideos - title not ready for", currentChannelName, videoContainer);
+    const key = `${currentChannelName}:${currentTitle}`;
+    if (scoredThisPass.has(key)) {
+      applyRevealStyle(el, scoredThisPass.get(key)!.check);
+      videoContainer.setAttribute("data-extension-title", currentTitle);
       return;
     }
 
-    // YouTube recycles DOM nodes in list views (e.g. re-searching reuses the
-    // same ytd-video-renderer instances with new data bound in). Fingerprint
-    // on the title text itself instead of a one-time boolean flag, so a
-    // recycled node with a new video gets reprocessed automatically.
-    const previouslyScoredTitle = videoContainer.getAttribute(
-      "data-extension-title",
-    );
-    if (previouslyScoredTitle === currentTitle) return;
-    const key = `${currentChannelName}:${currentTitle}`; // same key you use for scoring
-    console.log("this is the key",key);
-    if (scoredThisPass.has(key)) {
-      const cached = scoredThisPass.get(key)!;
-      (videoContainer as HTMLElement).style.backgroundColor = cached.check
-        ? "yellow"
-        : "";
-      videoContainer.setAttribute("data-extension-title", currentTitle);
-      console.log("reused cached score for", key, cached);
-      return; // skip the actual model call, reuse the result
-    }
-    videoContainer.setAttribute("data-extension-processing", "true");
-    videoContainer.setAttribute("data-extension-signature", currentTitle);
-    console.log("marked video as processing", key);
-
-    try {
-      console.log("this is the quee", scoredThisPass);
-      const relativityScore = await getRelativityScore(
-        `${currentChannelName}:${currentTitle}`,
-      );
-      if (!userPrefferedStrictness) {
-        const result = await chrome.storage.local.get("preference");
-        const preference = result.preference as PreferencesState;
-        userPrefferedStrictness = preference?.strictness ?? "balanced"; // or whatever default you want
-        console.log("userPreferredStrictness", userPrefferedStrictness);
-      }
-      const check =
-        youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ?? false;
-      scoredThisPass.set(key, { score: relativityScore, check });
-      console.log("coloring the video if i should", relativityScore, { key, check });
-      // (videoContainer as HTMLElement).style.display = check ? "none" : "";
-      (videoContainer as HTMLElement).style.backgroundColor = check
-        ? "yellow"
-        : "";
-      console.log("did what i should,check:", check);
-    } finally {
-      videoContainer.removeAttribute("data-extension-processing");
-    }
+    // Genuinely new — blur immediately, then let IntersectionObserver
+    // trigger the real scoring once it's about to be visible.
+    applyPendingStyle(el);
+    observer.observe(videoContainer);
   });
 }
 
@@ -135,27 +181,28 @@ export const scheduleProcessYoutubeVideos = debounce(() => {
 // --- Lifecycle Management ---
 export async function startYoutubeFiltering() {
   console.log("startYoutubeFiltering called");
-  if (youtubeObserver) return; // Already running
+  if (youtubeObserver) return;
 
   if (document.readyState === "loading") {
     await new Promise<void>((resolve) =>
-      document.addEventListener("DOMContentLoaded", () => resolve(), {
-        once: true,
-      }),
+      document.addEventListener("DOMContentLoaded", () => resolve(), { once: true }),
     );
   }
 
   youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
   youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
-  // YouTube is an SPA: navigating Home -> Search -> Subscriptions etc. does
-  // NOT reload the page, it fires this custom event instead. Hooking it
-  // makes flagging kick in immediately on navigation rather than waiting on
-  // whatever DOM mutations happen to fire.
-  youtubeNavigateFinishHandler = () => scheduleProcessYoutubeVideos();
+  youtubeNavigateFinishHandler = () => {
+    // Navigating to a new YouTube "page" (SPA) — old nodes are gone,
+    // reset scoring cache and intersection tracking for the new page.
+    scoredThisPass.clear();
+    intersectionObserver?.disconnect();
+    intersectionObserver = null;
+    scheduleProcessYoutubeVideos();
+  };
   document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
 
-  processYoutubeVideos(); // Catch existing videos already on the page
+  processYoutubeVideos();
 }
 
 export function stopYoutubeFiltering() {
@@ -165,17 +212,23 @@ export function stopYoutubeFiltering() {
     youtubeObserver = null;
   }
   if (youtubeNavigateFinishHandler) {
-    document.removeEventListener(
-      "yt-navigate-finish",
-      youtubeNavigateFinishHandler,
-    );
+    document.removeEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
     youtubeNavigateFinishHandler = null;
   }
+  intersectionObserver?.disconnect();
+  intersectionObserver = null;
+
   document.querySelectorAll(YOUTUBE_VIDEO_SELECTORS).forEach((el) => {
-    (el as HTMLElement).style.backgroundColor = "";
-    // (el as HTMLElement).style.display = "";
+    const htmlEl = el as HTMLElement;
+    htmlEl.style.backgroundColor = "";
+    htmlEl.style.opacity = "";
+    htmlEl.style.filter = "";
+    htmlEl.style.display = "";
+    htmlEl.style.transition = "";
     el.removeAttribute("data-extension-signature");
     el.removeAttribute("data-extension-processing");
+    el.removeAttribute("data-extension-observed");
+    el.removeAttribute("data-extension-title");
   });
   scoredThisPass.clear();
 }
