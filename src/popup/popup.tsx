@@ -19,6 +19,7 @@ import { CARD_DATA, type CardData } from "../lib/cards";
 import Carousel from "../components/topicsCarousel";
 import { useSelector } from "react-redux";
 import StrictnessToggle from "../components/strictnessToggle";
+import BlockedVideosList from "../components/yt_BlockedVideoList";
 
 const ExtensionPopup = () => {
 
@@ -117,9 +118,9 @@ console.log("active pack:",preference.activeTopicPack)
         </div>
       </div>
       <StrictnessToggle/>
-
+      
       <PlatformsToggles />
-
+      <BlockedVideosList/>
       {/* --- FEED ALIGNMENT --- */}
       {/* <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
         <h3 className="text-sm font-semibold mb-3">Feed Alignment</h3>

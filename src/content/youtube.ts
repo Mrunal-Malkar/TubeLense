@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  extractYoutubeChannelName,
-  extractYoutubeTitle,
-  youtubeFilterationCheck,
-} from "../functions/youtube_helper";
+  addBlockedVideo,
+} from "../storage/yt";
+import {extractYoutubeChannelName,
+extractYoutubeTitle,
+recordFilterResult,
+resetMismatchTracker,
+youtubeFilterationCheck,} from "../functions/youtube_helper"
 import { YOUTUBE_VIDEO_SELECTORS } from "../lib/selectors";
 import type { PreferencesState } from "../store/baseInfoStore";
 import { getRelativityScore } from "./content";
+import { showMismatchBanner } from "../components/small_components/MismatchedBanner";
 
 console.log("youtube.ts loaded", { href: location.href });
 
@@ -30,15 +34,27 @@ function applyPendingStyle(el: HTMLElement) {
   el.style.filter = PENDING_STYLE.filter;
 }
 
-function applyRevealStyle(el: HTMLElement, check: boolean) {
+// inside applyRevealStyle, extend the signature to carry what's needed for the record
+function applyRevealStyle(
+  el: HTMLElement,
+  check: boolean,
+  meta: { key: string; title: string; channelName: string; score: number },
+) {
   if (check) {
-    // stays hidden — fade out fully instead of the old instant display:none
     el.style.opacity = "0";
     el.style.filter = "blur(6px)";
-    // display:none after the fade finishes so it stops taking layout space
     setTimeout(() => {
       el.style.display = "none";
     }, 220);
+
+    addBlockedVideo({
+      key: meta.key,
+      title: meta.title,
+      channelName: meta.channelName,
+      score: meta.score,
+    }).catch((err) =>
+      console.log("[youtube] failed to record blocked video", err),
+    );
   } else {
     el.style.display = "";
     el.style.opacity = "1";
@@ -105,7 +121,9 @@ async function scoreVideoElement(videoContainer: Element) {
   const currentChannelName = extractYoutubeChannelName(videoContainer);
   if (!currentTitle) return; // title still not bound — just drop it, discovery pass will re-catch it later
 
-  const previouslyScoredTitle = videoContainer.getAttribute("data-extension-title");
+  const previouslyScoredTitle = videoContainer.getAttribute(
+    "data-extension-title",
+  );
   if (previouslyScoredTitle === currentTitle) return;
 
   const key = `${currentChannelName}:${currentTitle}`;
@@ -113,7 +131,12 @@ async function scoreVideoElement(videoContainer: Element) {
 
   if (scoredThisPass.has(key)) {
     const cached = scoredThisPass.get(key)!;
-    applyRevealStyle(el, cached.check);
+    applyRevealStyle(el, cached.check, {
+      key,
+      title: currentTitle,
+      channelName: currentChannelName ?? "",
+      score: cached.score,
+    });
     videoContainer.setAttribute("data-extension-title", currentTitle);
     return;
   }
@@ -131,9 +154,30 @@ async function scoreVideoElement(videoContainer: Element) {
       userPrefferedStrictness = preference?.strictness ?? "balanced";
     }
 
-    const check = youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ?? false;
+    const check =
+      youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ??
+      false;
     scoredThisPass.set(key, { score: relativityScore, check });
-    applyRevealStyle(el, check);
+    applyRevealStyle(el, check, {
+      key,
+      title: currentTitle,
+      channelName: currentChannelName ?? "",
+      score: relativityScore,
+    });
+    recordFilterResult(check, () => {
+  showMismatchBanner({
+    onAdjustStrictness: () => {
+      // content scripts can't force-open the popup directly — ask background to try
+      chrome.runtime.sendMessage({ action: "OPEN_POPUP_REQUEST" });
+    },
+    onPauseSession: () => {
+      stopYoutubeFiltering(); // already defined in this file
+    },
+    onDismiss: () => {
+      // no-op — banner just closes, filtering continues as-is
+    },
+  });
+});
   } finally {
     videoContainer.removeAttribute("data-extension-processing");
   }
@@ -162,7 +206,13 @@ export function processYoutubeVideos() {
     const currentChannelName = extractYoutubeChannelName(videoContainer);
     const key = `${currentChannelName}:${currentTitle}`;
     if (scoredThisPass.has(key)) {
-      applyRevealStyle(el, scoredThisPass.get(key)!.check);
+      const cached = scoredThisPass.get(key)!;
+      applyRevealStyle(el, cached.check, {
+        key,
+        title: currentTitle,
+        channelName: currentChannelName ?? "",
+        score: cached.score,
+      });
       videoContainer.setAttribute("data-extension-title", currentTitle);
       return;
     }
@@ -185,21 +235,24 @@ export async function startYoutubeFiltering() {
 
   if (document.readyState === "loading") {
     await new Promise<void>((resolve) =>
-      document.addEventListener("DOMContentLoaded", () => resolve(), { once: true }),
+      document.addEventListener("DOMContentLoaded", () => resolve(), {
+        once: true,
+      }),
     );
   }
 
   youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
   youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
-  youtubeNavigateFinishHandler = () => {
-    // Navigating to a new YouTube "page" (SPA) — old nodes are gone,
-    // reset scoring cache and intersection tracking for the new page.
-    scoredThisPass.clear();
-    intersectionObserver?.disconnect();
-    intersectionObserver = null;
-    scheduleProcessYoutubeVideos();
-  };
+// in the yt-navigate-finish handler, alongside your existing cache clears:
+youtubeNavigateFinishHandler = () => {
+  scoredThisPass.clear();
+  intersectionObserver?.disconnect();
+  intersectionObserver = null;
+  resetMismatchTracker(); // clears the rolling window; banner stays suppressed for the tab's lifetime
+  scheduleProcessYoutubeVideos();
+};
+
   document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
 
   processYoutubeVideos();
@@ -212,7 +265,10 @@ export function stopYoutubeFiltering() {
     youtubeObserver = null;
   }
   if (youtubeNavigateFinishHandler) {
-    document.removeEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
+    document.removeEventListener(
+      "yt-navigate-finish",
+      youtubeNavigateFinishHandler,
+    );
     youtubeNavigateFinishHandler = null;
   }
   intersectionObserver?.disconnect();

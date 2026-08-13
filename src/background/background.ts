@@ -202,3 +202,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
   sendResponse({ message: "No such message" });
 });
+
+// background.ts — handle the popup-open request (best-effort; requires Chrome 127+, and may silently no-op on older versions)
+chrome.runtime.onMessage.addListener((message) => {
+  if (message?.action === "OPEN_POPUP_REQUEST") {
+    chrome.action.openPopup().catch(() => {
+      console.log("could not open the banner.")
+      // not supported on this Chrome version — nothing to do, user can still click the icon manually
+    });
+  }
+});
