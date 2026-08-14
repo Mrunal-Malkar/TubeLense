@@ -44,11 +44,12 @@ function copyTransformersAssetsPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), crx({ manifest }),copyTransformersAssetsPlugin(),tailwindcss()],
   build: {
+    modulePreload:false,
     rollupOptions: {
       input: {
         background: "src/background/background.ts",
         offscreen:"src/background/offscreen.html"
-      }
+      },
     }
   }
 })

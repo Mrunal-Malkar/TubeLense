@@ -50,33 +50,38 @@ async function createExtractor(device: "webgpu" | "wasm") {
   return extractor;
 }
 
-async function getExtractor() {
+function getExtractor() {
+  
   if (extractorPromise) {
     console.log("[offscreen] Reusing existing extractor promise", { activeDevice });
     return extractorPromise;
   }
 
   console.log("[offscreen] no extractor yet, creating one");
-  const webGPUAvailable = await isWebGPUAvailable();
 
-  if (webGPUAvailable) {
-    try {
-      extractorPromise = createExtractor("webgpu");
-      await extractorPromise;
-      activeDevice = "webgpu";
-      console.log("[offscreen] extractor ready on webgpu", { activeDevice });
-      return extractorPromise;
-    } catch (err) {
-      console.log("[offscreen] WebGPU pipeline init failed, falling back to wasm", err);
-      extractorPromise = null;
+  extractorPromise = (async () => {
+    const webGPUAvailable = await isWebGPUAvailable();
+
+    if (webGPUAvailable) {
+      try {
+        const extractor = await createExtractor("webgpu");
+        activeDevice = "webgpu";
+        console.log("[offscreen] extractor ready on webgpu", { activeDevice });
+        return extractor;
+      } catch (err) {
+        console.log("[offscreen] WebGPU pipeline init failed, falling back to wasm", err);
+        // fall through to wasm below
+      }
+    } else {
+      console.log("[offscreen] WebGPU unavailable, using wasm");
     }
-  } else {
-    console.log("[offscreen] WebGPU unavailable, using wasm");
-  }
 
-  extractorPromise = createExtractor("wasm");
-  activeDevice = "wasm";
-  console.log("[offscreen] extractor ready on wasm", { activeDevice });
+    const extractor = await createExtractor("wasm");
+    activeDevice = "wasm";
+    console.log("[offscreen] extractor ready on wasm", { activeDevice });
+    return extractor;
+  })();
+
   return extractorPromise;
 }
 
