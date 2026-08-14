@@ -20,14 +20,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.08),transparent_32%),linear-gradient(135deg,#F7F8FC_0%,#FBFCFF_100%)] overflow-hidden">
+      <div className="flex min-h-screen w-90 items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.08),transparent_32%),linear-gradient(135deg,#F7F8FC_0%,#FBFCFF_100%)] overflow-y-auto pb-16">
         <Toaster />
 
         {/* You can now use currentPage to conditionally render your page components */}
-        {currentPage === 'home' && <HomePage />}
-        {currentPage === 'profile' && <Profile />}
-        {currentPage === 'insights' && <Insights />}
-        {currentPage === 'filters' && <Filters />}
+        {currentPage === "home" && <HomePage />}
+        {currentPage === "profile" && <Profile />}
+        {currentPage === "insights" && <Insights />}
+        {currentPage === "filters" && <Filters />}
 
         <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
       </div>

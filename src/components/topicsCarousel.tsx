@@ -216,16 +216,17 @@ export default function Carousel() {
   };
 
   return (
-  <div className="mx-auto w-full max-w-2xl bg-[#fbfbfe] p-3 sm:p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 font-sans">
+  <div className="mx-auto w-full bg-[#fbfbfe] p-3 sm:p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 font-sans">
       {/* ── Tab bar ────────────────────────────────────────────────── */}
-      <div
+<div
         ref={trackRef}
         role="tablist"
         aria-label="Topic Packs"
         tabIndex={0}
-        className="flex flex-wrap items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-gray-50/80 p-1.5 rounded-3xl border border-gray-100"
+        // Simplified container: removed heavy padding/background since items now have borders
+        className="flex flex-wrap items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
       >
-        {packs.map((pack:TopicsPack, i:number) => {
+        {packs.map((pack: TopicsPack, i: number) => {
           const active = pack.label === preference.activeTopicPack;
 
           return (
@@ -235,18 +236,20 @@ export default function Carousel() {
               aria-selected={active}
               onClick={() => goTo(i)}
               className={`
-                relative flex-1 min-w-[70px] rounded-2xl px-3 py-2 text-center text-sm font-medium transition-all duration-200 z-10
+                relative px-3 py-1.5 text-sm font-medium transition-all duration-200 z-10
+                border rounded-lg whitespace-nowrap
                 ${
                   active
-                    ? "text-blue-900"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-white/60"
+                    ? "border-blue-200 text-blue-900"
+                    : "border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50"
                 }
               `}
             >
               {active && (
                 <motion.span
                   layoutId="active-pill"
-                  className="absolute inset-0 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.02]"
+                  // Matched the border-radius (rounded-lg) and adjusted the background
+                  className="absolute inset-0 rounded-lg bg-blue-50/80 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ring-1 ring-blue-500/10"
                   transition={{ type: "spring", stiffness: 500, damping: 40 }}
                 />
               )}

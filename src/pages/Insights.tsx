@@ -3,7 +3,7 @@ import BlockedVideosList from '../components/yt_BlockedVideoList'
 
 const Insights = () => {
   return (
-    <div>
+    <div className='w-full p-2 h-full'>
          <BlockedVideosList />
     </div>
   )

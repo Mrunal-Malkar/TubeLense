@@ -42,7 +42,7 @@ const HomePage = () => {
   //   return
   // }
   return (
-    <div className="w-95 min-h-195 h-fit pb-8 bg-[#f6f7fb] rounded-4xl p-3 font-sans relative overflow-y-hidden scrollbar-auto shadow-2xl flex flex-col gap-3 text-[#1a1a2e]">
+    <div className="w-95 min-h-screen h-fit pb-8 scrollbar-none bg-[#f6f7fb] rounded-4xl p-3 font-sans relative overflow-y-hidden shadow-2xl flex flex-col gap-3 text-[#1a1a2e]">
       <ToastContainer />
       {/* --- HEADER --- */}
       <Header />

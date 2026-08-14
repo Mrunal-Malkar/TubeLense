@@ -14,3 +14,13 @@
 .soft-orbital-line {
   animation: drift 6s ease-in-out infinite alternate;
 }
+
+html::-webkit-scrollbar {
+    display: none;
+    width: 0;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+}   

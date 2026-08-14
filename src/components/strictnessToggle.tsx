@@ -16,9 +16,9 @@ export default function StrictnessToggle() {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
-      <div className="flex justify-between items-start mb-4">
-        <div>
+    <div className="bg-white rounded-2xl h-fit p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] z-10">
+      <div className="flex justify-between h-fit items-start mb-4">
+        <div className="h-fit">
           <h3 className="text-sm font-semibold mb-1">Focus Intensity</h3>
           <p className="text-[10px] text-gray-500 min-h-[15px] transition-all">
             {intensity === "relaxed" &&
