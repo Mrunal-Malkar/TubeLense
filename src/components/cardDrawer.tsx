@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CARD_DATA, type CardData } from "../lib/cards";
 import { useDispatch, useSelector } from "react-redux";

@@ -48,8 +48,8 @@ const initialState: PreferencesState = {
   sites: {
     yt: true,
     insta: false,
-    x: true,
-    google: true,
+    x: false,
+    google: false,
   },
   topicsPack: [
     {
