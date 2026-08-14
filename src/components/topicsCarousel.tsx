@@ -216,7 +216,7 @@ export default function Carousel() {
   };
 
   return (
-  <div className="mx-auto w-full bg-[#fbfbfe] p-3 sm:p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 font-sans">
+  <div className="mx-auto w-full bg-[#fbfbfe] max-w-90 p-3 sm:p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 font-sans">
       {/* ── Tab bar ────────────────────────────────────────────────── */}
 <div
         ref={trackRef}
@@ -224,7 +224,7 @@ export default function Carousel() {
         aria-label="Topic Packs"
         tabIndex={0}
         // Simplified container: removed heavy padding/background since items now have borders
-        className="flex flex-wrap items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+        className="flex flex-wrap items-center gap-2 outline-none max-w-85 focus-visible:ring-2 focus-visible:ring-blue-500/40"
       >
         {packs.map((pack: TopicsPack, i: number) => {
           const active = pack.label === preference.activeTopicPack;
@@ -236,7 +236,7 @@ export default function Carousel() {
               aria-selected={active}
               onClick={() => goTo(i)}
               className={`
-                relative px-3 py-1.5 text-sm font-medium transition-all duration-200 z-10
+                relative px-3 py-1.5 text-sm font-medium max-w-85 transition-all duration-200 z-10
                 border rounded-lg whitespace-nowrap
                 ${
                   active
@@ -293,10 +293,10 @@ export default function Carousel() {
             animate={{ height: "auto", opacity: 1 }}
             exit={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
+            className="overflow-hidden max-w-85"
           >
             <div className="pt-4 pb-1">
-              <div className="relative min-h-[360px] overflow-hidden rounded-[24px] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.03)] border border-gray-100/80">
+              <div className="relative min-h-90 max-w-85 overflow-hidden rounded-3xl bg-white shadow-[0_2px_20px_rgba(0,0,0,0.03)] border border-gray-100/80">
                 <AnimatePresence mode="wait" custom={direction} initial={false}>
                   <motion.article
                     key={activePack.label}

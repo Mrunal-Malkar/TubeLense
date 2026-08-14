@@ -37,7 +37,6 @@ export function youtubeFilterationCheck(relativityScore:number,userPreferredStri
     case "strict":
       return relativityScore<STRICT_STRICTNESS_SCORE
   }
-  
 }
 
 

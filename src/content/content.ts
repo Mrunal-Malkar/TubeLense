@@ -174,7 +174,7 @@ export async function getRelativityScore(videoTitle: string) {
       "as number",
       Number(response.similarity),
     );
-    if (!response.success) return 1;
+    if (!response.success) return 2;
 
     return Number(response.similarity);
   } catch (error) {

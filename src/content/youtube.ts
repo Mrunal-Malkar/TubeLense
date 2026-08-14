@@ -41,6 +41,7 @@ function applyRevealStyle(
   meta: { key: string; title: string; channelName: string; score: number },
 ) {
   if (check) {
+    console.log("making it go invisible.")
     el.style.opacity = "0";
     el.style.filter = "blur(6px)";
     setTimeout(() => {
@@ -86,10 +87,9 @@ function getIntersectionObserver(): IntersectionObserver {
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") return;
-
   const preference = changes.preference?.newValue as PreferencesState;
-  console.log("youtube.ts message event preference:", preference);
   if (preference) {
+    console.log("youtube.ts message event preference:", preference);
     userPrefferedStrictness = preference.strictness;
   }
 });
@@ -147,7 +147,7 @@ async function scoreVideoElement(videoContainer: Element) {
 
   try {
     const relativityScore = await getRelativityScore(key);
-
+      console.log("got the relativity score in youtube.ts for title",currentTitle,"it's",relativityScore);
     if (!userPrefferedStrictness) {
       const result = await chrome.storage.local.get("preference");
       const preference = result.preference as PreferencesState;
@@ -157,13 +157,16 @@ async function scoreVideoElement(videoContainer: Element) {
     const check =
       youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ??
       false;
+      console.log("this is the check.",check,"for",currentTitle);
     scoredThisPass.set(key, { score: relativityScore, check });
+    console.log("going in",currentTitle,"for applyRevealStyle")
     applyRevealStyle(el, check, {
       key,
       title: currentTitle,
       channelName: currentChannelName ?? "",
       score: relativityScore,
     });
+    console.log("done with the applyRevealStyle")
     recordFilterResult(check, () => {
   showMismatchBanner({
     onAdjustStrictness: () => {
