@@ -19,7 +19,7 @@ let youtubeNavigateFinishHandler: (() => void) | null = null;
 let userPrefferedStrictness: string;
 const scoredThisPass = new Map<string, { score: number; check: boolean }>();
 
-// --- NEW: visibility-gated scoring ---
+// --- visibility-gated scoring ---
 let intersectionObserver: IntersectionObserver | null = null;
 
 const PENDING_STYLE = {
@@ -28,10 +28,38 @@ const PENDING_STYLE = {
   transition: "opacity 0.25s ease, filter 0.25s ease",
 };
 
+// --- Failure-recovery tuning ---
+const MAX_TITLE_RETRIES = 5;
+const TITLE_RETRY_DELAY_MS = 500;
+const SAFETY_TIMEOUT_MS = 8000;
+
 function applyPendingStyle(el: HTMLElement) {
   el.style.transition = PENDING_STYLE.transition;
   el.style.opacity = PENDING_STYLE.opacity;
   el.style.filter = PENDING_STYLE.filter;
+
+  // Fail-safe: if this element never gets resolved for ANY reason
+  // (observer never fires, scoring throws, title never appears, etc.)
+  // don't leave it stuck blurred forever.
+  setTimeout(() => {
+    const stillPending = el.style.opacity === PENDING_STYLE.opacity;
+    const resolved = el.hasAttribute("data-extension-title");
+    if (stillPending && !resolved) {
+      console.error(
+        "[youtube-filter] video stuck blurred past safety timeout — reverting",
+        el,
+      );
+      revertPendingStyle(el);
+      el.removeAttribute("data-extension-observed"); // let discovery pick it up again
+    }
+  }, SAFETY_TIMEOUT_MS);
+}
+
+function revertPendingStyle(el: HTMLElement) {
+  el.style.transition = "";
+  el.style.opacity = "1";
+  el.style.filter = "";
+  el.style.display = "";
 }
 
 // inside applyRevealStyle, extend the signature to carry what's needed for the record
@@ -72,7 +100,14 @@ function getIntersectionObserver(): IntersectionObserver {
         if (!entry.isIntersecting) continue;
         const el = entry.target as HTMLElement;
         intersectionObserver!.unobserve(el); // score once, then stop watching
-        scoreVideoElement(el);
+        scoreVideoElement(el).catch((err) => {
+          console.error(
+            "[youtube-filter] unexpected error scoring element",
+            err,
+            el,
+          );
+          revertPendingStyle(el);
+        });
       }
     },
     {
@@ -112,14 +147,43 @@ function getTopLevelVideoElements(): Element[] {
   );
 }
 
-// --- NEW: the actual scoring logic, now only invoked once an element is
-// about to be visible (called from the IntersectionObserver callback) ---
-async function scoreVideoElement(videoContainer: Element) {
+// --- the actual scoring logic, only invoked once an element is about to be
+// visible (called from the IntersectionObserver callback), with retry +
+// error logging so failures can never leave a video silently stuck blurred ---
+async function scoreVideoElement(
+  videoContainer: Element,
+  retryCount = 0,
+): Promise<void> {
   if (videoContainer.hasAttribute("data-extension-processing")) return;
 
+  const el = videoContainer as HTMLElement;
   const currentTitle = extractYoutubeTitle(videoContainer);
   const currentChannelName = extractYoutubeChannelName(videoContainer);
-  if (!currentTitle) return; // title still not bound — just drop it, discovery pass will re-catch it later
+
+  if (!currentTitle) {
+    if (retryCount < MAX_TITLE_RETRIES) {
+      setTimeout(() => {
+        scoreVideoElement(videoContainer, retryCount + 1).catch((err) => {
+          console.error(
+            "[youtube-filter] retry scoring threw",
+            err,
+            videoContainer,
+          );
+          revertPendingStyle(el);
+        });
+      }, TITLE_RETRY_DELAY_MS);
+      return;
+    }
+    console.error(
+      "[youtube-filter] title never appeared after",
+      MAX_TITLE_RETRIES,
+      "retries — reverting blur",
+      videoContainer,
+    );
+    revertPendingStyle(el);
+    videoContainer.removeAttribute("data-extension-observed");
+    return;
+  }
 
   const previouslyScoredTitle = videoContainer.getAttribute(
     "data-extension-title",
@@ -127,7 +191,6 @@ async function scoreVideoElement(videoContainer: Element) {
   if (previouslyScoredTitle === currentTitle) return;
 
   const key = `${currentChannelName}:${currentTitle}`;
-  const el = videoContainer as HTMLElement;
 
   if (scoredThisPass.has(key)) {
     const cached = scoredThisPass.get(key)!;
@@ -147,7 +210,12 @@ async function scoreVideoElement(videoContainer: Element) {
 
   try {
     const relativityScore = await getRelativityScore(key);
-      console.log("got the relativity score in youtube.ts for title",currentTitle,"it's",relativityScore);
+    console.log(
+      "got the relativity score in youtube.ts for title",
+      currentTitle,
+      "it's",
+      relativityScore,
+    );
     if (!userPrefferedStrictness) {
       const result = await chrome.storage.local.get("preference");
       const preference = result.preference as PreferencesState;
@@ -157,30 +225,39 @@ async function scoreVideoElement(videoContainer: Element) {
     const check =
       youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ??
       false;
-      console.log("this is the check.",check,"for",currentTitle);
+    console.log("this is the check.", check, "for", currentTitle);
     scoredThisPass.set(key, { score: relativityScore, check });
-    console.log("going in",currentTitle,"for applyRevealStyle")
+    console.log("going in", currentTitle, "for applyRevealStyle");
     applyRevealStyle(el, check, {
       key,
       title: currentTitle,
       channelName: currentChannelName ?? "",
       score: relativityScore,
     });
-    console.log("done with the applyRevealStyle")
+    console.log("done with the applyRevealStyle");
     recordFilterResult(check, () => {
-  showMismatchBanner({
-    onAdjustStrictness: () => {
-      // content scripts can't force-open the popup directly — ask background to try
-      chrome.runtime.sendMessage({ action: "OPEN_POPUP_REQUEST" });
-    },
-    onPauseSession: () => {
-      stopYoutubeFiltering(); // already defined in this file
-    },
-    onDismiss: () => {
-      // no-op — banner just closes, filtering continues as-is
-    },
-  });
-});
+      showMismatchBanner({
+        onAdjustStrictness: () => {
+          // content scripts can't force-open the popup directly — ask background to try
+          chrome.runtime.sendMessage({ action: "OPEN_POPUP_REQUEST" });
+        },
+        onPauseSession: () => {
+          stopYoutubeFiltering(); // already defined in this file
+        },
+        onDismiss: () => {
+          // no-op — banner just closes, filtering continues as-is
+        },
+      });
+    });
+  } catch (err) {
+    console.error(
+      "[youtube-filter] scoring failed for",
+      currentTitle,
+      err,
+    );
+    // fail OPEN — show the video rather than leave it permanently blurred
+    revertPendingStyle(el);
+    videoContainer.removeAttribute("data-extension-title");
   } finally {
     videoContainer.removeAttribute("data-extension-processing");
   }
@@ -247,14 +324,14 @@ export async function startYoutubeFiltering() {
   youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
   youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
-// in the yt-navigate-finish handler, alongside your existing cache clears:
-youtubeNavigateFinishHandler = () => {
-  scoredThisPass.clear();
-  intersectionObserver?.disconnect();
-  intersectionObserver = null;
-  resetMismatchTracker(); // clears the rolling window; banner stays suppressed for the tab's lifetime
-  scheduleProcessYoutubeVideos();
-};
+  // in the yt-navigate-finish handler, alongside your existing cache clears:
+  youtubeNavigateFinishHandler = () => {
+    scoredThisPass.clear();
+    intersectionObserver?.disconnect();
+    intersectionObserver = null;
+    resetMismatchTracker(); // clears the rolling window; banner stays suppressed for the tab's lifetime
+    scheduleProcessYoutubeVideos();
+  };
 
   document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
 
