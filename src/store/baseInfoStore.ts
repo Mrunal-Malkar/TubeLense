@@ -62,7 +62,7 @@ const initialState: PreferencesState = {
   ],
 
   cards: {
-    selectedCardName: CARD_NAME.ENERGY_BOOST,
+    selectedCardName: CARD_NAME.NO_BS,
   },
 };
 

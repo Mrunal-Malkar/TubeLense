@@ -26,7 +26,7 @@ export default function CardDrawer({
 }) {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState(""); // <-- Added Search State
-  
+
   const dispatch = useDispatch();
 
   const topics = useMemo(() => {
@@ -39,14 +39,14 @@ export default function CardDrawer({
   // <-- Added Filter Logic
   const filteredCards = useMemo(() => {
     if (!searchQuery.trim()) return CARD_DATA;
-    
+
     const lowerQuery = searchQuery.toLowerCase();
     return CARD_DATA.filter(
       (card) =>
         card.title.toLowerCase().includes(lowerQuery) ||
         card.name.toLowerCase().includes(lowerQuery) ||
         card.description.toLowerCase().includes(lowerQuery) ||
-        card.topics?.some((topic) => topic.toLowerCase().includes(lowerQuery))
+        card.topics?.some((topic) => topic.toLowerCase().includes(lowerQuery)),
     );
   }, [searchQuery]);
 
@@ -123,8 +123,16 @@ export default function CardDrawer({
               {/* <-- Added Search Bar UI */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <input
@@ -310,7 +318,9 @@ export default function CardDrawer({
 
                                 <span className="text-[10px] font-semibold text-gray-400">
                                   {card.topics.length}{" "}
-                                  {card.topics.length === 1 ? "topic" : "topics"}
+                                  {card.topics.length === 1
+                                    ? "topic"
+                                    : "topics"}
                                 </span>
                               </div>
 
@@ -385,10 +395,22 @@ export default function CardDrawer({
                 })
               ) : (
                 <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                  <svg className="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-12 h-12 mb-3 opacity-20"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
-                  <p className="text-sm font-medium">No cards found matching "{searchQuery}"</p>
+                  <p className="text-sm font-medium">
+                    No cards found matching "{searchQuery}"
+                  </p>
                 </div>
               )}
             </div>
