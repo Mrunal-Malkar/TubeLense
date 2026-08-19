@@ -7,9 +7,9 @@ export const Email="mrunalpmalkar@gmail.com";
 // export const RELAXED_STRICTNESS_SCORE:number=0.035
 // export const BALANCED_STRICTNESS_SCORE:number=0.05
 // export const STRICT_STRICTNESS_SCORE:number=0.078
-export const RELAXED_STRICTNESS_SCORE:number=0
-export const BALANCED_STRICTNESS_SCORE:number=0.1
-export const STRICT_STRICTNESS_SCORE:number=0.35
+export const RELAXED_STRICTNESS_SCORE:number=0.05
+export const BALANCED_STRICTNESS_SCORE:number=0.2
+export const STRICT_STRICTNESS_SCORE:number=0.3
 
 
 // YOUTUBE

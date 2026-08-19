@@ -4,9 +4,6 @@ import ext3Image from "./assets/ext3.png"
 import { 
   CheckCircle2, 
   Sparkles, 
-  Zap, 
-  SlidersHorizontal, 
-  PlusCircle, 
   MonitorPlay,
   ArrowRight,
   ShieldCheck, // New
@@ -14,42 +11,56 @@ import {
   BrainCircuit, // New
   Filter       // New
 } from 'lucide-react';
+import Feature from "./component/feature";
 
 const TubeLensLanding = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-500/30 overflow-x-hidden font-sans">
       
       {/* Navbar - Light Mode */}
-      <nav className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            
-            {/* Logo */}
-            <div className="flex items-center gap-2 flex-1">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/20">
-                <MonitorPlay className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-lg tracking-tight text-slate-900">TubeLens</span>
+     {/* Playful Floating Navbar */}
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 bg-white/80 backdrop-blur-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-full px-4 sm:px-6 py-3">
+        <div className="flex justify-between items-center">
+          
+          {/* Logo Area */}
+          <div className="flex items-center gap-3 flex-1 cursor-pointer group">
+            {/* Playful tilted logo box */}
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 transform -rotate-6 group-hover:rotate-0 transition-transform duration-300">
+              <MonitorPlay className="w-5 h-5 text-white" />
             </div>
-            
-            {/* Centered Navigation */}
-            <div className="hidden md:flex space-x-8 flex-1 justify-center">
-              <a href="#features" className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">How it Works</a>
-              <a href="#pricing" className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">Pricing</a>
+            <div className="flex items-center gap-2">
+              <span className="font-black text-xl tracking-tight text-slate-900">TubeLens</span>
+              {/* Little floating version badge */}
+              <span className="hidden sm:inline-block bg-indigo-50 text-indigo-600 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-indigo-100 uppercase tracking-widest shadow-sm">
+                Beta
+              </span>
             </div>
-            
-            {/* Right side CTA */}
-            <div className="flex-1 flex justify-end">
-              <button className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-lg font-bold text-sm transition-all shadow-md">
-                Add to Chrome
-              </button>
-            </div>
-            
           </div>
+          
+          {/* Centered Navigation (Inner Pill Menu) */}
+          <div className="hidden md:flex items-center space-x-1 flex-1 justify-center bg-slate-100/50 p-1.5 rounded-full border border-slate-200/50">
+            <a href="#features" className="text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-white px-5 py-2 rounded-full transition-all shadow-sm shadow-transparent hover:shadow-slate-200/50">
+              Features
+            </a>
+            <a href="#how-it-works" className="text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-white px-5 py-2 rounded-full transition-all shadow-sm shadow-transparent hover:shadow-slate-200/50">
+              How it Works
+            </a>
+            <a href="#pricing" className="text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-white px-5 py-2 rounded-full transition-all shadow-sm shadow-transparent hover:shadow-slate-200/50">
+              Pricing
+            </a>
+          </div>
+          
+          {/* Right side CTA */}
+          <div className="flex-1 flex justify-end">
+            <button className="group relative bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2 overflow-hidden border border-slate-800">
+              <span className="relative z-10">Add to Chrome</span>
+              {/* Very subtle shine effect on hover */}
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite] z-0"></div>
+            </button>
+          </div>
+          
         </div>
       </nav>
-
       <main className="relative z-10">
         {/* Hero Section */}
         <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center justify-end min-h-screen">
@@ -111,76 +122,7 @@ const TubeLensLanding = () => {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-24 relative bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-black text-xs mb-6 uppercase tracking-widest">
-                Features
-              </div>
-              
-              <h2 className="text-3xl lg:text-5xl font-black mb-6 text-slate-900 leading-tight">
-                Built for <span className="relative inline-block whitespace-nowrap">
-                  deep work
-                  {/* Decorative curved underline */}
-                  <svg className="absolute w-full h-3 -bottom-1 left-0 text-blue-500 opacity-70" viewBox="0 0 100 10" preserveAspectRatio="none">
-                    <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round"/>
-                  </svg>
-                </span> <br className="hidden md:block"/> & healthy binging.
-              </h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium">Replace the opaque algorithm with transparent, user-controlled filters that respect your time.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Feature 1 */}
-              <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-lg transition-all hover:-translate-y-1 duration-300">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
-                  <Zap className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Pre-built Filter Cards</h3>
-                <p className="text-slate-600 mb-6 text-sm leading-relaxed font-medium">Activate our expertly curated topic packs instantly. Block the noise with a single click.</p>
-                <ul className="space-y-3">
-                  <li className="flex items-center text-sm font-bold text-slate-700 bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-100">
-                    <span className="mr-3 text-lg">📚</span> NO BS: Pure Educational
-                  </li>
-                  <li className="flex items-center text-sm font-bold text-slate-700 bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-100">
-                    <span className="mr-3 text-lg">😂</span> Good Vibes: Comedy & Fun
-                  </li>
-                  <li className="text-xs text-blue-600 font-bold pl-2 pt-1">+ 5 more specialized cards</li>
-                </ul>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-lg transition-all hover:-translate-y-1 duration-300">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
-                  <SlidersHorizontal className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Focus Intensity</h3>
-                <p className="text-slate-600 mb-8 text-sm leading-relaxed font-medium">Not all days require military-grade focus. Dial in your exact level of control dynamically.</p>
-                <div className="bg-slate-200 p-1.5 rounded-2xl flex text-sm text-center relative overflow-hidden">
-                  <div className="absolute inset-y-1.5 left-[33%] w-[33%] bg-white rounded-xl shadow-sm border border-slate-100 transition-all"></div>
-                  <div className="flex-1 py-3 text-slate-500 font-bold z-10">Relaxed</div>
-                  <div className="flex-1 py-3 text-slate-900 font-black z-10">Balanced</div>
-                  <div className="flex-1 py-3 text-slate-500 font-bold z-10">Strict</div>
-                </div>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:shadow-lg transition-all hover:-translate-y-1 duration-300">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
-                  <PlusCircle className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Build Custom Cards</h3>
-                <p className="text-slate-600 mb-6 text-sm leading-relaxed font-medium">Your feed, your rules. Group your own topics, keywords, and channels into custom decks.</p>
-                <div className="mt-8 border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:bg-slate-100 hover:border-blue-300 transition-all cursor-pointer flex flex-col items-center justify-center gap-2">
-                  <PlusCircle className="w-8 h-8 text-slate-400" />
-                  <span className="text-sm font-bold text-slate-600">Create New Deck</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <Feature/>
 
         {/* How it Works Section */}
         <section id="how-it-works" className="py-24 relative bg-slate-50 border-t border-slate-200 overflow-hidden">

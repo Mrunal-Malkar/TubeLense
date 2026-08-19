@@ -1,29 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { startYoutubeFiltering, stopYoutubeFiltering } from "./youtube";
-import { type PreferencesState, type Sites } from "../store/baseInfoStore";
+import { type PreferencesState } from "../store/baseInfoStore";
 
 // --- Site Dispatch ---
 // Central place to route to the right site's filtering logic based on the
 // current page's hostname. Add a new `case` + real start/stop functions
 // (mirroring the Youtube* pattern above) when adding support for a new site.
 async function startFilteringForCurrentSite() {
+  console.log("called startingFiltering function")
   const host = window.location.hostname;
   const hostName: string = getHostName(host) ?? "";
-
+  console.log("this is the hostName:",hostName)
   // chrome.storage.local.get returns a Promise in Manifest V3 context (or takes a callback).
   // Await the promise and extract preference safely.
   const prefs = await chrome.storage.local.get("preference");
-  const sites: Sites= (prefs?.preference as PreferencesState)?.sites 
+  console.log("the prefs is",prefs);
   switch (hostName) {
     case "yt":
-      if(sites.yt!=true)break;
       console.log("starting to filter (youtube)");
+    console.log("calling startYoutubeFiltering switch case")
       startYoutubeFiltering();
       break;
 
     // case "x":
-    if(sites.x!=true)break;
+    // if(sites.x!=true)break;
     // case hostname.includes("x.com"):
     //   console.log("starting to filter (twitter)");
     //   startTwitterFiltering();

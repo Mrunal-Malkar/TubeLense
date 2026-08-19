@@ -266,10 +266,14 @@ async function scoreVideoElement(
 // --- Discovery pass: finds new video nodes, blurs them immediately, and
 // hands them to the IntersectionObserver instead of scoring right away ---
 export function processYoutubeVideos() {
+  console.log("called processYoutubeVideos");
+
   const videoElements = getTopLevelVideoElements();
   const observer = getIntersectionObserver();
+  console.log("the videoElements:",videoElements);
 
   videoElements.forEach((videoContainer) => {
+    console.log("running forEach on videoElements")
     // already discovered & being watched/scored — skip
     if (videoContainer.hasAttribute("data-extension-observed")) return;
 
@@ -310,17 +314,18 @@ export const scheduleProcessYoutubeVideos = debounce(() => {
 
 // --- Lifecycle Management ---
 export async function startYoutubeFiltering() {
-  console.log("startYoutubeFiltering called");
+  console.log("startYoutubeFiltering called function");
   if (youtubeObserver) return;
-
+console.log("youtubeobserver not found.")
   if (document.readyState === "loading") {
+    console.log("still in loading state so sending back.")
     await new Promise<void>((resolve) =>
       document.addEventListener("DOMContentLoaded", () => resolve(), {
         once: true,
       }),
     );
   }
-
+  console.log("creating new mutation observer.")
   youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
   youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -334,6 +339,7 @@ export async function startYoutubeFiltering() {
   };
 
   document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
+  console.log("about to call processYotubeVideos")
 
   processYoutubeVideos();
 }
