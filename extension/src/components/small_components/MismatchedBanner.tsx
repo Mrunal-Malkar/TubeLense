@@ -70,7 +70,7 @@ export function showMismatchBanner(actions: BannerActions) {
   }
 
   const message = document.createElement("span");
-  message.textContent = "FeedLenss is hiding most of what's in your feed right now.";
+  message.textContent = "TubeLens is hiding most of what's in your feed right now.";
   message.style.flex = "1";
 
   const actionsWrap = document.createElement("div");

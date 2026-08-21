@@ -28,21 +28,21 @@ return(
             {/* HIGH IMPORTANCE: Before/After Slider Container */}
             <div className="relative max-w-5xl mx-auto mb-24 mt-12 group">
               {/* Soft ambient glow behind the slider */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-200 via-indigo-100 to-purple-200 rounded-[3rem] blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-slate-800 via-indigo-500 to-purple-400 rounded-[3rem] blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
               
               {/* Browser Mockup Frame */}
-              <div className="relative z-10 bg-white p-2 md:p-3 rounded-[2rem] shadow-2xl border border-slate-200/80">
+              <div className="relative z-10 bg-black p-2 md:p-3 rounded-[2rem] shadow-2xl border border-slate-200/80">
                 
                 {/* Fake Browser Top Bar */}
                 <div className="flex items-center gap-4 px-4 py-3 mb-2">
                   {/* Traffic Light Buttons */}
                   <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-slate-200 hover:bg-red-400 transition-colors"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200 hover:bg-amber-400 transition-colors"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-200 hover:bg-emerald-400 transition-colors"></div>
+                    <div className="w-3 h-3 rounded-full bg-red-400 transition-colors"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-400 transition-colors"></div>
+                    <div className="w-3 h-3 rounded-full bg-emerald-400 transition-colors"></div>
                   </div>
                   {/* Fake URL Bar */}
-                  <div className="flex-1 max-w-md mx-auto bg-slate-50 text-slate-400 text-xs font-bold px-4 py-2 rounded-full flex items-center justify-center gap-2 border border-slate-100">
+                  <div className="flex-1 max-w-md mx-auto bg-black text-slate-300 text-xs font-bold px-4 py-2 rounded-full flex items-center justify-center gap-2 border border-slate-800">
                     youtube.com <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider">Filtered</span>
                   </div>
                 </div>
