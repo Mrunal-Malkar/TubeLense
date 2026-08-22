@@ -1,6 +1,6 @@
 
 import { MoreHorizontal, Sparkles } from "lucide-react";
-import finaLogo from "./../assets/Logov4.svg";
+import finaLogo from "./../../public/Logov4.svg";
 
 export default function Header(){
   return (

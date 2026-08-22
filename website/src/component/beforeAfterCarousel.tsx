@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Hand, Grab } from "lucide-react";
-import beforeImg from "../assets/ext.png";
-import afterImg from "../assets/ext2.png";
+import beforeImg from "/ext.png";
+import afterImg from "/ext2.png";
 
 export default function BeforeAfterSlider() {
   const [sliderPosition, setSliderPosition] = useState(50);

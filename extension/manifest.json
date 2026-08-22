@@ -3,8 +3,14 @@
   "name": "My Vite Extension",
   "version": "1.0.0",
   "action": {
-    "default_popup": "index.html"
+    "default_popup": "index.html",
+    "default_icon":{
+      "16":"favicon.png",
+      "18":"favicon.png",
+      "20":"favicon.png"
+    }
   },
+  "icons":{"16":"favicon.png","18":"favicon.png","20":"favicon.png"},
   "permissions":["activeTab","scripting","storage","offscreen"],
   "background": {
     "service_worker": "src/background/background.ts",
