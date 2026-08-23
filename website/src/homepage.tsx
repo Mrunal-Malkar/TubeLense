@@ -1,7 +1,7 @@
 import extImage from "/ext.png"
 import ext2Image from "/ext2.png"
 import ext3Image from "/ext3.png"
-import logo from "/Logov4.svg";
+import logo from "/trans_logo.png";
 import { 
   CheckCircle2, 
   Sparkles, 
