@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Footer from '../component/footer'
 
 const Refund_Policy = () => {

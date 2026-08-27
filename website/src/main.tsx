@@ -12,15 +12,15 @@ const router = createBrowserRouter([
     element: <Homepage />,
   },
   {
-    path: "/privacy_policy",
+    path: "/privacy-policy",
     element: <Privacy_Policy />,
   },
   {
-    path:"/terms_of_services",
+    path:"/terms-of-services",
     element:<Terms_Of_Services/>
   },
   {
-    path:"refund_policy",
+    path:"refund-policy",
     element:<Refund_Policy/>
   },
   {
