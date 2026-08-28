@@ -45,7 +45,7 @@ const Homepage = () => {
     try {
       setIsLoading(true);
       if (session) return;
-      
+      // it works
       // OAuth redirects the page, so the loader will spin until the redirect happens
       await supabase.auth.signInWithOAuth({
         provider: "google",
