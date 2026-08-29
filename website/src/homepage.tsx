@@ -41,6 +41,33 @@ const Homepage = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handlePurchase = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    // Show your login UI
+    return;
+  }
+
+  const { data, error } = await supabase.functions.invoke(
+    "create-checkout",
+  );
+
+  if (error) {
+    console.error("Checkout error:", error);
+    return;
+  }
+
+  if (!data?.checkout_url) {
+    console.error("No checkout URL returned");
+    return;
+  }
+
+  window.location.href = data.checkout_url;
+};
+
   async function userLogIn() {
     try {
       setIsLoading(true);
@@ -162,7 +189,7 @@ const Homepage = () => {
             {/* Buttons and Badge anchored together */}
             <div className="flex flex-col items-center gap-6 w-full sm:w-auto">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
+                <button onClick={handlePurchase} className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
                   Get TubeLens for Free
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>

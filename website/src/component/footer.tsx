@@ -1,4 +1,4 @@
-import { MonitorPlay } from 'lucide-react';
+import Logo from "/trans_logo.png"
 
 const Footer = () => {
   return (
@@ -10,7 +10,9 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="md:col-span-6 space-y-4">
             <div className="flex items-center gap-2">
-              <MonitorPlay className="w-6 h-6 text-blue-500" />
+              <span className="w-6 h-6 text-blue-500" >
+              <img src={Logo} alt="tubelense logog" className="w-6 h-6 text-blue-500" />
+              </span>
               <span className="font-bold text-xl text-white tracking-tight">
                 TubeLense
               </span>
@@ -27,17 +29,17 @@ const Footer = () => {
             </h3>
             <ul className="space-y-3">
               <li>
-                <a href="/privacy_policy" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
+                <a href="/privacy-policy" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="/terms_of_services" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
+                <a href="/terms-of-services" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="/refund_policy" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
+                <a href="/refund-policy" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200">
                   Refund Policy
                 </a>
               </li>
