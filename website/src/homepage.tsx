@@ -77,7 +77,7 @@ const Homepage = () => {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://tubelens.vercel.com/auth/callback",
+          redirectTo: "https://tubelense.vercel.com/auth/callback",
         },
       });
     } catch (err) {
