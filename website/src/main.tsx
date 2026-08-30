@@ -6,6 +6,9 @@ import Privacy_Policy from './pages/privacy_policy.tsx';
 import Terms_Of_Services from './pages/terms-of-services.tsx';
 import Refund_Policy from './pages/refund_policy.tsx';
 import Contact from './pages/contact.tsx';
+import PaymentSuccess from './pages/payment-success.tsx';
+import PaymentFailed from './pages/payment-failed.tsx';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,7 +29,15 @@ const router = createBrowserRouter([
   {
     path:"contact",
     element:<Contact/>
-  }
+  },
+  {
+    path:"payment-success",
+    element:<PaymentSuccess/>
+  },
+  {
+    path:"payment-failed",
+    element:<PaymentFailed/>
+  },
 ]);
 
 // 2. Pass the router config to the RouterProvider
