@@ -3,18 +3,12 @@ import ext2Image from "/ext2.png";
 import ext3Image from "/ext3.png";
 import logo from "/trans_logo.png";
 import {
-  CheckCircle2,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
-  Cpu,
-  BrainCircuit,
-  Filter,
 } from "lucide-react";
 import Feature from "./component/feature";
 import { supabase } from "./utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
-
 import { useState, useEffect } from "react";
 import {type Session } from "@supabase/supabase-js";
 import Footer from "./component/footer";
