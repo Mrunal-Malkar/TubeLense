@@ -190,7 +190,7 @@ async function scoreVideoElement(
   );
   if (previouslyScoredTitle === currentTitle) return;
 
-  const key = `${currentChannelName}:${currentTitle}`;
+  const key = `${currentTitle}SPLIT-_-SPLIT${currentChannelName}`;
 
   if (scoredThisPass.has(key)) {
     const cached = scoredThisPass.get(key)!;
@@ -288,7 +288,7 @@ export function processYoutubeVideos() {
     // shelf entry for a video we already scored), apply it instantly —
     // no need to blur-then-reveal for something we already know about.
     const currentChannelName = extractYoutubeChannelName(videoContainer);
-    const key = `${currentChannelName}:${currentTitle}`;
+    const key = `${currentTitle}SPLIT-_-SPLIT${currentChannelName}`;
     if (scoredThisPass.has(key)) {
       const cached = scoredThisPass.get(key)!;
       applyRevealStyle(el, cached.check, {

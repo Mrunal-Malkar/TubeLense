@@ -15,7 +15,7 @@ export interface PreferencesState {
     google: boolean;
   };
   topicsPack: { label: string; topics: { id: string; topic: string }[] }[];
-
+  ignoredChannels:string[];
   cards: {
     selectedCardName: string;
   };
@@ -44,7 +44,7 @@ const initialState: PreferencesState = {
   activeTopicPack: "My Topics",
   focusScore: 0,
   strictness:"balanced",
-
+  ignoredChannels:[],
   sites: {
     yt: true,
     insta: false,
@@ -328,13 +328,29 @@ export const preferencesSlice = createSlice({
         }
       }
     },
+
+    // channels
+    addIgnoredChannels(state,action:PayloadAction<string[]>){
+      state.ignoredChannels=action.payload;
+    },
+
+    appendChannel(state,action:PayloadAction<string>){
+      state.ignoredChannels.push(action.payload);
+    },
+
+    removeChannel(state,action:PayloadAction<string>){
+      state.ignoredChannels.filter(i=>i!=action.payload);
+    }
   },
 });
 
 export const {
   toggleActiveMode,
   setActiveMode,
+  addIgnoredChannels,
+  appendChannel,
   moveTopicDown,
+  removeChannel,
   moveTopicUp,
   setSiteEnabled,
   toggleSiteEnabled,
