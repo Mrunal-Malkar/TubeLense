@@ -5,9 +5,12 @@ import { ToastContainer } from "react-toastify";
 const FocusScoreAndAnimatedSphere = () => {
   // Added state so the UI can physically react to the click
   const [isActive, setIsActive] = useState(false);
-  const focusScore=chrome.storage.local.get("focus_score", (result) => {
-    return result.focus_score;
+  let focusScore=50;
+  chrome.storage.local.get("focus_score",(result)=>{
+    focusScore=typeof result.focusScore === "number" ? result.focusScore : 0;
   });
+  const wording = focusScore >= 80 ? "Excellent" : focusScore >= 50 ? "Good" : "Watch card related videos to improve your score";
+
   // Check storage on load to set the correct visual state
   useEffect(() => {
     const fetchState = async () => {
@@ -64,7 +67,7 @@ const FocusScoreAndAnimatedSphere = () => {
             {focusScore??"--"}
           </span>
           <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full">
-            Excellent
+         {wording}
           </span>
         </div>
         {/* Progress Dots */}
@@ -73,7 +76,7 @@ const FocusScoreAndAnimatedSphere = () => {
             <div
               key={i}
               className={`h-2 w-2 rounded-full ${
-                i < 9 ? "bg-indigo-500" : "bg-indigo-100"
+                (wording==="Excellent"?i < 11:wording==="Good"?i < 9 : i < 5) ? "bg-indigo-500" : "bg-indigo-100"
               }`}
             />
           ))}
