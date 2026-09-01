@@ -81,7 +81,13 @@ export function recordFilterResult(wasHidden: boolean, onMismatchDetected: Misma
  
   const hiddenCount = recentResults.filter(Boolean).length;
   const ratio = hiddenCount / recentResults.length;
-  console.log(`[mismatchTracker] checked ratio: ${hiddenCount}/${recentResults.length} = ${ratio.toFixed(2)} (threshold ${MISMATCH_THRESHOLD})`);
+const focusScore = Math.max(
+  0,
+  Math.min(100, (1 - ratio / MISMATCH_THRESHOLD) * 100),
+);
+chrome.storage.local.set({"focus_score": focusScore});
+
+  console.log(`[mismatchTracker] checked ratio: ${hiddenCount}/${recentResults.length} = ${ratio.toFixed(3)} (threshold ${MISMATCH_THRESHOLD})`);
  
   if (ratio >= MISMATCH_THRESHOLD) {
     console.log("[mismatchTracker] MISMATCH DETECTED — firing banner");

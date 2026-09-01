@@ -340,6 +340,11 @@ export const preferencesSlice = createSlice({
 
     removeChannel(state,action:PayloadAction<string>){
       state.ignoredChannels.filter(i=>i!=action.payload);
+    },
+
+    // focus score
+    setFocusScore(state,action:PayloadAction<number>){
+      state.focusScore=action.payload;
     }
   },
 });

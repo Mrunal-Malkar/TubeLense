@@ -5,7 +5,9 @@ import { ToastContainer } from "react-toastify";
 const FocusScoreAndAnimatedSphere = () => {
   // Added state so the UI can physically react to the click
   const [isActive, setIsActive] = useState(false);
-
+  const focusScore=chrome.storage.local.get("focus_score", (result) => {
+    return result.focus_score;
+  });
   // Check storage on load to set the correct visual state
   useEffect(() => {
     const fetchState = async () => {
@@ -59,7 +61,7 @@ const FocusScoreAndAnimatedSphere = () => {
         <h2 className="text-sm font-medium text-gray-800">Focus Score</h2>
         <div className="flex items-baseline gap-2">
           <span className="text-5xl font-semibold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-500">
-            91%
+            {focusScore??"--"}
           </span>
           <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full">
             Excellent

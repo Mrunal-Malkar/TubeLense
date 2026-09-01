@@ -15,6 +15,6 @@ export const STRICT_STRICTNESS_SCORE:number=0.1
 // YOUTUBE
 // banner for mismatched feed.
 export const WINDOW_SIZE = 25; // how many recent results to judge the ratio over
-export const MISMATCH_THRESHOLD = 1.25; // 85%+ hidden within the window = likely mismatch
+export const MISMATCH_THRESHOLD = 1.10; // 85%+ hidden within the window = likely mismatch
 export const CHECK_INTERVAL = 8; // only re-evaluate every ~8 processed videos, not every one
  

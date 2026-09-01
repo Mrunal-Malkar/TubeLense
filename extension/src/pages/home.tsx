@@ -22,7 +22,6 @@ const HomePage = () => {
   const [showConfirmCardClickPopup, setShowConfirmCardClickPopup] =
     useState<boolean>(false);
   // const dispatch=useDispatch();
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const preference = useSelector((state: any) => state.preference);
   console.log("preference", preference);
@@ -41,6 +40,7 @@ const HomePage = () => {
   // if(error){
   //   return
   // }
+
   return (
     <div className="w-95 min-h-screen h-fit pb-8 scrollbar-none bg-[#f6f7fb] rounded-4xl p-3 font-sans relative overflow-y-hidden shadow-2xl flex flex-col gap-3 text-[#1a1a2e]">
       <ToastContainer />
