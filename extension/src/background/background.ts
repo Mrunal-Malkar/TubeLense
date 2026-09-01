@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CARD_DATA } from "../lib/cards";
+import { CARD_DATA, YOUTUBE_TOPIC_KEYWORDS } from "../lib/cards";
 import type { PreferencesState, TopicsPack } from "../store/baseInfoStore";
 import { initStore } from "../store/store";
 
@@ -15,7 +15,7 @@ let cardName: string | undefined;
 let offscreenReady: Promise<void> | null = null;
 let resolveOffscreenReady: (() => void) | null = null;
 // const ignoredChannels:string[]=((await chrome.storage.local.get("ignoredChannels"))?.ignoredChannels)??[];
-let ignoredChannels:string[];
+let ignoredChannels: string[];
 
 function getOffscreenDocumentPath(): string {
   return chrome.runtime.getURL("src/background/offscreen.html");
@@ -92,15 +92,40 @@ async function ensureOffscreenDocument() {
   ]);
 }
 
-
-async function checkForIgnoredChannelName(channelName:string){
-  if(!ignoredChannels){
-    ignoredChannels=((await chrome.storage.local.get("ignoredChannels"))?.ignoredChannels??[]) as string[];
+async function checkForAutoScores(text: string) {
+  console.log("the text for checkAutoSScores:",text);
+  if (!ignoredChannels) {
+    ignoredChannels = ((await chrome.storage.local.get("ignoredChannels"))
+      ?.ignoredChannels ?? []) as string[];
   }
-  console.log("the ignoredChannels",ignoredChannels);
-  if(ignoredChannels.length==0)return false;
+  console.log("the ignoredChannels", ignoredChannels);
 
-  return ignoredChannels.includes(channelName);
+  const TitleAndChannel = (text as string).split("SPLIT-_-SPLIT");
+  const channelCheck = ignoredChannels.includes(TitleAndChannel[1]);
+  if (channelCheck === true) {
+    return true;
+  }
+
+  console.log("the channel isn't there for ", TitleAndChannel[1],"moving to check for topicKeywords");
+
+  if (isStandardCard && cardName) {
+    console.log("got into topic keywords")
+    const topicKeywords =
+      YOUTUBE_TOPIC_KEYWORDS[cardName.toUpperCase() as keyof typeof YOUTUBE_TOPIC_KEYWORDS];
+      console.log("the topicKeywords for the cardName:",cardName,"is:",topicKeywords);
+    if (!topicKeywords) return false;
+
+    console.log("we have got the topicKeywords",topicKeywords,"for th cardName:",cardName);
+    const JoinedTitleAndChannel = TitleAndChannel.join(" ").toLowerCase();
+    console.log("the joined title and channel:",JoinedTitleAndChannel);
+    const check = topicKeywords.some((keyword: string) =>
+      JoinedTitleAndChannel.includes(keyword),
+    );
+    console.log("the check for topicKeywords:",check,"for card Name",cardName,"and title and channel:",JoinedTitleAndChannel);
+    if (check === true) return true;
+  }
+
+  return false;
 }
 
 // Listen for the offscreen document's "I'm ready" ping.
@@ -184,18 +209,21 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         }
       }
       try {
-        console.log("message",message,"the splitted messsage not 1:",(message.text as string).split("SPLIT-_-SPLIT"))
-        const channelName=((message.text as string).split("SPLIT-_-SPLIT"))[1];
-        console.log("got splitted channelName",channelName,"going for the check");
-        const check=await checkForIgnoredChannelName(channelName);
-        if(check===true){
-           sendResponse({
-        success: true,
-        title:message.text,
-        similarity: 5,
-        device: "None",
-      });
-      return
+        console.log(
+          "message",
+          message,
+          "the splitted messsage not 1:",
+          (message.text as string).split("SPLIT-_-SPLIT"),
+        );
+        const check = await checkForAutoScores(message.text as string);
+        if (check === true) {
+          sendResponse({
+            success: true,
+            title: message.text,
+            similarity: 5,
+            device: "None",
+          });
+          return;
         }
         await ensureOffscreenDocument();
         if (isStandardCard && cardName) {
@@ -213,8 +241,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           throw new Error("userPreferredTopics is undefined or empty");
         }
 
-        const channelAndTitleSorted=message.text.split("SPLIT-_-SPLIT").join("");
-        console.log("channelAndTitleSorted before sending to offscreen:",channelAndTitleSorted);
+        const channelAndTitleSorted = message.text
+          .split("SPLIT-_-SPLIT")
+          .join("");
+        console.log(
+          "channelAndTitleSorted before sending to offscreen:",
+          channelAndTitleSorted,
+        );
         const res = await sendToOffscreen({
           target: "offscreen",
           task: "evaluate_relativity",
