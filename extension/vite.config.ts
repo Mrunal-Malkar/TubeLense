@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react'
 import { crx } from '@crxjs/vite-plugin'
 import manifest from './manifest.json' with { type: 'json' }
 
-
 import path from 'path'
 import fs from 'fs/promises'
 import type { Plugin } from 'vite'
@@ -13,26 +12,33 @@ function copyTransformersAssetsPlugin(): Plugin {
   return {
     name: 'copy-transformers-assets',
     apply: 'build',
+
     async closeBundle() {
       const root = process.cwd()
+
       const srcDir = path.resolve(root, 'toBeInDest/dist')
       const destDir = path.resolve(root, 'dist/wasm')
+
       await fs.mkdir(destDir, { recursive: true })
+
+      // Keep ONLY the WASM runtime files.
+      //
+      // WebGPU does not require these WASM binaries.
+      // WASM execution uses the appropriate ONNX Runtime WASM binary.
       const files = [
-        'ort-wasm-simd-threaded.jsep.mjs',
-        'ort-wasm-simd-threaded.jsep.wasm',
         'ort-wasm-simd-threaded.asyncify.mjs',
         'ort-wasm-simd-threaded.asyncify.wasm',
-        'ort.wasm.mjs',
-        'ort.wasm.min.mjs',
       ]
-      for (const f of files) {
-        const src = path.join(srcDir, f)
-        const dest = path.join(destDir, f)
+
+      for (const file of files) {
+        const src = path.join(srcDir, file)
+        const dest = path.join(destDir, file)
+
         try {
           await fs.copyFile(src, dest)
+          console.log(`Copied: ${file}`)
         } catch (err) {
-          console.warn(`Could not copy ${f}:`, err)
+          console.warn(`Could not copy ${file}:`, err)
         }
       }
     },
