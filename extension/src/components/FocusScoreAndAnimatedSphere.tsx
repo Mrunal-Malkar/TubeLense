@@ -3,15 +3,39 @@ import toast from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 
 const FocusScoreAndAnimatedSphere = () => {
-  // Added state so the UI can physically react to the click
   const [isActive, setIsActive] = useState(false);
-  let focusScore=50;
-  chrome.storage.local.get("focus_score",(result)=>{
-    focusScore=typeof result.focusScore === "number" ? result.focusScore : 0;
-  });
-  const wording = focusScore >= 80 ? "Excellent" : focusScore >= 50 ? "Good" : "Watch card related videos to improve your score";
+  const [focusScore, setFocusScore] = useState<number>(0);
 
-  // Check storage on load to set the correct visual state
+  useEffect(() => {
+    if (typeof chrome === "undefined" || !chrome.storage) return;
+
+    chrome.storage.local.get("focus_score", (result) => {
+      const nextScore = typeof result.focus_score === "number" ? result.focus_score : 0;
+      setFocusScore(nextScore);
+      console.log("Initial focusScore:", nextScore);
+    });
+
+    const handleStorageChange = (
+      changes: Record<string, chrome.storage.StorageChange>,
+      areaName: string,
+    ) => {
+      if (areaName === "local" && changes.focus_score) {
+        const newValue = changes.focus_score.newValue;
+        setFocusScore(typeof newValue === "number" ? newValue : 0);
+        console.log("Updated focusScore:", typeof newValue === "number" ? newValue : 0);
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  const wording = focusScore >= 70 ? "Excellent" : focusScore >= 40 ? "Good" : "Watch related videos, improve your score";
+  const dotsOutOfTwelve = Math.round((focusScore / 100) * 12);
+
   useEffect(() => {
     const fetchState = async () => {
       if (typeof chrome !== "undefined" && chrome.storage) {
@@ -64,7 +88,7 @@ const FocusScoreAndAnimatedSphere = () => {
         <h2 className="text-sm font-medium text-gray-800">Focus Score</h2>
         <div className="flex items-baseline gap-2">
           <span className="text-5xl font-semibold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-500">
-            {focusScore??"--"}
+            {focusScore}%
           </span>
           <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full">
          {wording}
@@ -76,7 +100,7 @@ const FocusScoreAndAnimatedSphere = () => {
             <div
               key={i}
               className={`h-2 w-2 rounded-full ${
-                (wording==="Excellent"?i < 11:wording==="Good"?i < 9 : i < 5) ? "bg-indigo-500" : "bg-indigo-100"
+                 i < dotsOutOfTwelve ? "bg-indigo-500" : "bg-indigo-100"
               }`}
             />
           ))}

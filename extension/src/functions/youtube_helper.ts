@@ -1,5 +1,17 @@
-import { YOUTUBE_CHANNEL_SELECTORS, YOUTUBE_TITLE_SELECTORS } from "../lib/selectors";
-import { BALANCED_STRICTNESS_SCORE, CHECK_INTERVAL, MISMATCH_THRESHOLD, RELAXED_STRICTNESS_SCORE, STRICT_STRICTNESS_SCORE, WINDOW_SIZE } from "../lib/statics";
+import {
+  YOUTUBE_CHANNEL_SELECTORS,
+  YOUTUBE_TITLE_SELECTORS,
+} from "../lib/selectors";
+import {
+  BALANCED_STRICTNESS_SCORE,
+  CHECK_INTERVAL,
+  MISMATCH_THRESHOLD,
+  RELAXED_STRICTNESS_SCORE,
+  STRICT_STRICTNESS_SCORE,
+  WINDOW_SIZE,
+} from "../lib/statics";
+
+let lastCheckForFocusScore = 0;
 
 export function extractYoutubeChannelName(container: Element): string {
   for (const sel of YOUTUBE_CHANNEL_SELECTORS) {
@@ -21,26 +33,33 @@ export function extractYoutubeTitle(container: Element): string {
   }
   // Fallback: the thumbnail/title anchor's aria-label often carries the full
   // title (plus metadata) even before the visible title node has bound text.
-  const link = container.querySelector("a#thumbnail, a") as HTMLAnchorElement | null;
+  const link = container.querySelector(
+    "a#thumbnail, a",
+  ) as HTMLAnchorElement | null;
   const label = link?.getAttribute("aria-label")?.trim();
   if (label) return label;
   return "";
 }
 
-export function youtubeFilterationCheck(relativityScore:number,userPreferredStrictness:string){
- console.log("yoututbe filteration check helper,relativityScore;",relativityScore,"userPrefferedStrictness:",userPreferredStrictness)
-  switch(userPreferredStrictness){
+export function youtubeFilterationCheck(
+  relativityScore: number,
+  userPreferredStrictness: string,
+) {
+  console.log(
+    "yoututbe filteration check helper,relativityScore;",
+    relativityScore,
+    "userPrefferedStrictness:",
+    userPreferredStrictness,
+  );
+  switch (userPreferredStrictness) {
     case "relaxed":
-      return relativityScore<RELAXED_STRICTNESS_SCORE
+      return relativityScore < RELAXED_STRICTNESS_SCORE;
     case "balanced":
-      return relativityScore<BALANCED_STRICTNESS_SCORE
+      return relativityScore < BALANCED_STRICTNESS_SCORE;
     case "strict":
-      return relativityScore<STRICT_STRICTNESS_SCORE
+      return relativityScore < STRICT_STRICTNESS_SCORE;
   }
 }
-
-
-
 
 // mismatchTracker.ts
 //
@@ -48,54 +67,80 @@ export function youtubeFilterationCheck(relativityScore:number,userPreferredStri
 // consecutive streak (which resets too easily on one lucky match) and
 // without checking on every single video (wasted work — the ratio barely
 // moves video-to-video, so there's no value in recomputing it that often).
- 
+
 export type MismatchCallback = () => void;
 
 const recentResults: boolean[] = []; // true = hidden
 let sinceLastCheck = 0;
 let bannerShownThisSession = false; // once true, never fires again until resetMismatchTracker()
- 
+
 /**
  * Call this every time a video finishes scoring, with whether it was hidden.
  * Internally throttles the actual ratio check to every CHECK_INTERVAL calls,
  * and after the mismatch callback fires once, goes permanently silent for
  * the rest of the session (until resetMismatchTracker() is explicitly called).
  */
-export function recordFilterResult(wasHidden: boolean, onMismatchDetected: MismatchCallback) {
+function UpdateFocusScore(ratio: number) {
+  lastCheckForFocusScore += 1;
+  if (lastCheckForFocusScore < 15) return;
+
+  lastCheckForFocusScore = 0;
+
+  const score = Number(
+    Math.max(0, Math.min(100, (1 - ratio / MISMATCH_THRESHOLD) * 100)).toFixed(
+      0,
+    ),
+  );
+  let focusScore = score;
+  if (score < 50) {
+    focusScore = score + 20;
+  } else if (score >= 50 && score < 80) {
+    focusScore = score + 10;
+  }
+
+  if (typeof chrome !== "undefined" && chrome.storage) {
+    chrome.storage.local.set({ focus_score: focusScore });
+  }
+}
+
+export function recordFilterResult(
+  wasHidden: boolean,
+  onMismatchDetected: MismatchCallback,
+) {
   recentResults.push(wasHidden);
   if (recentResults.length > WINDOW_SIZE) recentResults.shift();
- 
+  const hiddenCount = recentResults.filter(Boolean).length;
+  const ratio = hiddenCount / recentResults.length;
+  UpdateFocusScore(ratio);
   if (bannerShownThisSession) {
-    console.log("[mismatchTracker] banner already shown this session, staying quiet");
+    console.log(
+      "[mismatchTracker] banner already shown this session, staying quiet",
+    );
     return;
   }
- 
+
   sinceLastCheck++;
   if (sinceLastCheck < CHECK_INTERVAL) return;
   sinceLastCheck = 0;
- 
+
   if (recentResults.length < WINDOW_SIZE) {
-    console.log(`[mismatchTracker] not enough data yet: ${recentResults.length}/${WINDOW_SIZE}`);
+    console.log(
+      `[mismatchTracker] not enough data yet: ${recentResults.length}/${WINDOW_SIZE}`,
+    );
     return;
   }
- 
-  const hiddenCount = recentResults.filter(Boolean).length;
-  const ratio = hiddenCount / recentResults.length;
-const focusScore = Math.max(
-  0,
-  Math.min(100, (1 - ratio / MISMATCH_THRESHOLD) * 100),
-);
-chrome.storage.local.set({"focus_score": focusScore});
 
-  console.log(`[mismatchTracker] checked ratio: ${hiddenCount}/${recentResults.length} = ${ratio.toFixed(3)} (threshold ${MISMATCH_THRESHOLD})`);
- 
+  console.log(
+    `[mismatchTracker] checked ratio: ${hiddenCount}/${recentResults.length} = ${ratio.toFixed(3)} (threshold ${MISMATCH_THRESHOLD})`,
+  );
+
   if (ratio >= MISMATCH_THRESHOLD) {
     console.log("[mismatchTracker] MISMATCH DETECTED — firing banner");
     bannerShownThisSession = true;
     onMismatchDetected();
   }
 }
- 
+
 /**
  * Clears the rolling window (e.g. on SPA navigation to a very different
  * view — home vs a search results page). Deliberately does NOT reset
