@@ -17,7 +17,7 @@
     "type": "module"
   },
   "content_scripts": [{
-  "matches": ["*://*.youtube.com/*", "*://*.twitter.com/*","*://*.x.com/*","*://*.google.com/*","*://*.instagram.com/*"],
+  "matches": ["*://*.youtube.com/*"],
   "js": ["src/content/content.ts","src/content/youtube.ts", "src/content/x.ts", "src/content/instagram.ts","src/content/google.ts"]
 }]
 ,"content_security_policy": {

@@ -21,9 +21,6 @@ function copyTransformersAssetsPlugin(): Plugin {
 
       await fs.mkdir(destDir, { recursive: true })
 
-      // Keep ONLY the WASM runtime files.
-      //
-      // WebGPU does not require these WASM binaries.
       // WASM execution uses the appropriate ONNX Runtime WASM binary.
       const files = [
         'ort-wasm-simd-threaded.asyncify.mjs',

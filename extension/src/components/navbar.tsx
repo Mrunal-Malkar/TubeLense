@@ -1,4 +1,4 @@
-import { Home, PieChart, SlidersHorizontal, User } from "lucide-react";
+import { Home, PieChart, SlidersHorizontal } from "lucide-react";
 
 interface NavbarProps {
   currentPage: string;
@@ -40,13 +40,13 @@ const Navbar = ({ currentPage, onNavigate }: NavbarProps) => {
         <span className="text-[10px] font-medium">Insights</span>
       </button>
 
-      <button 
+      {/* <button 
         onClick={() => onNavigate("profile")} 
         className={getButtonClass("profile")}
       >
         <User size={20} />
         <span className="text-[10px] font-medium">Profile</span>
-      </button>
+      </button> */}
     </div>
   );
 };
