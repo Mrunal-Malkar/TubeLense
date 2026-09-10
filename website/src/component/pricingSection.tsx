@@ -1,6 +1,19 @@
 import { CheckCircle2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { listLocalizedPricesResponse } from "../utils/dodoClient"
+
+
 
 const PricingSection = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [price, setPrice] = useState(2.7)
+
+  useEffect(() => {
+    const data=listLocalizedPricesResponse;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    console.log("the data pricingsection:",data);
+  }, [])
+
   return (
      <section
           id="pricing"
@@ -64,7 +77,7 @@ const PricingSection = () => {
 
                   <h3 className="text-2xl font-bold mb-2 text-white">Pro</h3>
                   <div className="text-5xl font-extrabold mb-6 text-white">
-                    $2.70{" "}
+                    ${price?.toFixed(2) || '2.70'}{" "}
                     <span className="text-lg font-medium text-blue-400">
                       one-time
                     </span>

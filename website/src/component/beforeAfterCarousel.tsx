@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Hand, Grab } from "lucide-react";
-import beforeImg from "/ext.png";
-import afterImg from "/ext2.png";
+import beforeImg from "/before.png";
+import afterImg from "/after.png";
 
 export default function BeforeAfterSlider() {
   const [sliderPosition, setSliderPosition] = useState(50);
@@ -29,7 +29,7 @@ export default function BeforeAfterSlider() {
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full overflow-hidden select-none rounded-2xl shadow-2xl h-[720px] transition-colors ${
+      className={`relative w-full overflow-hidden select-none rounded-2xl shadow-2xl h-[540px] transition-colors ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       onMouseMove={handleMouseMove}
