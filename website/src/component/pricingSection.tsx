@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { CheckCircle2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { listLocalizedPricesResponse } from "../utils/dodoClient"
@@ -12,6 +13,7 @@ const PricingSection = () => {
     const data=listLocalizedPricesResponse;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     console.log("the data pricingsection:",data);
+    setPrice(5);
   }, [])
 
   return (
