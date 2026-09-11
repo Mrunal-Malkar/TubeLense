@@ -67,8 +67,8 @@ const Filters = () => {
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <h2 className="text-sm font-semibold text-slate-600 mb-3 flex items-center justify-between">
+      <div className="flex flex-col p-1">
+        <h2 className="text-sm p-2 font-semibold text-slate-600 mb-3 flex items-center justify-between">
           Ignored Channels
           <span className="bg-slate-100 text-slate-500 py-0.5 px-2 rounded-full text-xs font-medium">
             {safeChannels.length}

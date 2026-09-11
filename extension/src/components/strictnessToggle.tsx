@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Wind, SlidersHorizontal, ShieldAlert } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStrictness } from "../store/baseInfoStore";
@@ -12,7 +12,6 @@ export default function StrictnessToggle() {
   const [intensity, setIntensity] = useState<string>(strictness);
   const dispatch = useDispatch();
 
-  useEffect(() => {
     // Check if chrome.storage is available to prevent crashes in local dev environments
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
       // 1. Get initial value on mount
@@ -20,7 +19,7 @@ export default function StrictnessToggle() {
         const active = result.lens_active;
         setIsActive(active === true || active === "true");
       });
-
+    }
       // 2. Listen for changes in case it gets toggled elsewhere in the extension
       const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
         if (areaName === "local" && changes.lens_active) {
@@ -31,12 +30,6 @@ export default function StrictnessToggle() {
 
       chrome.storage.onChanged.addListener(handleStorageChange);
 
-      // Cleanup listener on unmount
-      return () => {
-        chrome.storage.onChanged.removeListener(handleStorageChange);
-      };
-    }
-  }, []);
 
   function handleClick(arg: string) {
     if (!isActive) return;

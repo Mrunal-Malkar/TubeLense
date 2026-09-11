@@ -1,50 +1,61 @@
-import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import { ToastContainer } from "react-toastify";
+import { useSyncExternalStore } from "react";
+import { toast, ToastContainer } from "react-toastify";
+// Import toast and ToastContainer wherever they are coming from...
 
-const FocusScoreAndAnimatedSphere = () => {
-  const [isActive, setIsActive] = useState(false);
-  const [focusScore, setFocusScore] = useState<number>(0);
+// 1. Create a generic factory for Chrome Storage stores OUTSIDE the component
+// This prevents it from recreating on every render.
+function createChromeStore<T>(key: string, defaultValue: T) {
+  let cache: T = defaultValue;
+  const listeners = new Set<() => void>();
 
-  useEffect(() => {
-    if (typeof chrome === "undefined" || !chrome.storage) return;
-
-    chrome.storage.local.get("focus_score", (result) => {
-      const nextScore = typeof result.focus_score === "number" ? result.focus_score : 0;
-      setFocusScore(nextScore);
-      console.log("Initial focusScore:", nextScore);
+  if (typeof chrome !== "undefined" && chrome.storage) {
+    // Fetch initial data
+    chrome.storage.local.get(key, (result) => {
+      if (result[key] !== undefined) {
+        cache = result[key] as T;
+        listeners.forEach((l) => l());
+      }
     });
 
-    const handleStorageChange = (
-      changes: Record<string, chrome.storage.StorageChange>,
-      areaName: string,
-    ) => {
-      if (areaName === "local" && changes.focus_score) {
-        const newValue = changes.focus_score.newValue;
-        setFocusScore(typeof newValue === "number" ? newValue : 0);
-        console.log("Updated focusScore:", typeof newValue === "number" ? newValue : 0);
+    // Listen for cross-extension changes
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === "local" && changes[key]) {
+        cache = (changes[key].newValue !== undefined ? changes[key].newValue : defaultValue) as T;
+        listeners.forEach((l) => l());
       }
-    };
+    });
+  }
 
-    chrome.storage.onChanged.addListener(handleStorageChange);
+  return {
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    getSnapshot: () => cache,
+    getServerSnapshot: () => defaultValue, // Prevents errors during SSR/Next.js if applicable
+  };
+}
 
-    return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-    };
-  }, []);
+// 2. Instantiate your specific stores
+const focusScoreStore = createChromeStore<number>("focus_score", 0);
+const lensActiveStore = createChromeStore<boolean>("lens_active", false);
+
+const FocusScoreAndAnimatedSphere = () => {
+  // 3. Connect to the stores directly (No useEffect or useState needed!)
+  const focusScore = useSyncExternalStore(
+    focusScoreStore.subscribe,
+    focusScoreStore.getSnapshot,
+    focusScoreStore.getServerSnapshot
+  );
+
+  const isActive = useSyncExternalStore(
+    lensActiveStore.subscribe,
+    lensActiveStore.getSnapshot,
+    lensActiveStore.getServerSnapshot
+  );
 
   const wording = focusScore >= 70 ? "Excellent" : focusScore >= 40 ? "Good" : "Watch related videos, improve your score";
   const dotsOutOfTwelve = Math.round((focusScore / 100) * 12);
-
-  useEffect(() => {
-    const fetchState = async () => {
-      if (typeof chrome !== "undefined" && chrome.storage) {
-        const data = await chrome.storage.local.get("lens_active");
-        setIsActive(!!data.lens_active);
-      }
-    };
-    fetchState();
-  }, []);
 
   async function activeExtension() {
     if (typeof chrome === "undefined" || !chrome.storage) {
@@ -52,33 +63,13 @@ const FocusScoreAndAnimatedSphere = () => {
       return;
     }
 
-    const currentData = await chrome.storage.local.get("lens_active");
-    const current = currentData.lens_active;
-
-    // Handle initial un-set state
-    if (current === undefined || current === null) {
-      await chrome.storage.local.set({ lens_active: true });
-      setIsActive(true);
-      toast.success("activated");
-      return;
-    }
-
-    const type = typeof current;
-    if (type !== "boolean") {
-      toast.error("unexpected lens_active type");
-      return;
-    }
-
-    // Toggle and visually update the UI
-    const newState = !current;
+    const newState = !isActive;
+    
+    // Setting this in Chrome storage automatically triggers the listener 
+    // inside our store, which natively updates the React component. 
+    // No manual setState required!
     await chrome.storage.local.set({ lens_active: newState });
-    setIsActive(newState);
 
-    if (newState) {
-      toast.success("activated");
-    } else {
-      toast.success("deactivated");
-    }
   }
 
   return (
@@ -91,7 +82,7 @@ const FocusScoreAndAnimatedSphere = () => {
             {focusScore}%
           </span>
           <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full">
-         {wording}
+            {wording}
           </span>
         </div>
         {/* Progress Dots */}
@@ -100,7 +91,7 @@ const FocusScoreAndAnimatedSphere = () => {
             <div
               key={i}
               className={`h-2 w-2 rounded-full ${
-                 i < dotsOutOfTwelve ? "bg-indigo-500" : "bg-indigo-100"
+                i < dotsOutOfTwelve ? "bg-indigo-500" : "bg-indigo-100"
               }`}
             />
           ))}
