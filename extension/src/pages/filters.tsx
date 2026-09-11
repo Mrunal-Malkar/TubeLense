@@ -4,8 +4,9 @@ import StrictnessToggle from '../components/strictnessToggle';
 import { useDispatch, useSelector } from 'react-redux';
 import { addIgnoredChannels, appendChannel, removeChannel } from '../store/baseInfoStore';
 import { toast, ToastContainer } from 'react-toastify';
+import { Info } from 'lucide-react';
 
-const Filters = () => {
+const Filters = ({ goToInfoPage }: { goToInfoPage: () => void }) => {
   const dispatch = useDispatch();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ignoredChannels: string[] = useSelector((state: any) => state.preference?.ignoredChannels);
@@ -58,10 +59,20 @@ const Filters = () => {
     <div className="flex flex-col h-full p-4 max-w-sm gap-6">
       <ToastContainer/>
       <div>
-        <h1 className="text-lg font-semibold text-slate-700 m-0.5 flex items-center gap-2">
-          <span className="w-1.5 h-5 rounded-full bg-indigo-400" />
-          Packs & corresponding topics
-        </h1>
+        <div className="flex justify-between items-center w-full">
+          <h1 className="text-lg font-semibold text-slate-700 m-0.5 flex items-center gap-2">
+            <span className="w-1.5 h-5 rounded-full bg-indigo-400" />
+            Packs & corresponding topics
+          </h1>
+          
+          <button onClick={goToInfoPage} className="group relative w-8 h-8 shrink-0 hover:cursor-pointer bg-white rounded-full flex items-center justify-center shadow-sm text-gray-800 hover:text-black transition">
+            <Info size={18} />
+            <div className="absolute top-full right-0 mt-2 w-max px-2.5 py-1.5 bg-gray-800 text-white text-[10px] font-medium rounded shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-50">
+              how to use effectively
+            </div>
+          </button>
+        </div>
+        
         <div className="mt-2">
           <Carousel />
         </div>

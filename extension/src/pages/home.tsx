@@ -43,7 +43,7 @@ function createLensActiveStore() {
 
 const lensActiveStore = createLensActiveStore();
 
-const HomePage = () => {
+const HomePage = ({ goToInfoPage }: { goToInfoPage: () => void }) => {
   // 2. Safely read Chrome storage without triggering render loops
   const isActive = useSyncExternalStore(
     lensActiveStore.subscribe,
@@ -71,7 +71,7 @@ const HomePage = () => {
   return (
     <div className="w-95 min-h-screen h-fit pb-8 scrollbar-none bg-[#f6f7fb] rounded-4xl p-3 font-sans relative overflow-y-hidden shadow-2xl flex flex-col gap-3 text-[#1a1a2e]">
       <ToastContainer />
-      <Header />
+      <Header goToInfoPage={goToInfoPage} />
       <FocusScoreAndAnimatedSphere />
 
       {/* --- CURRENT BRAIN MODE --- */}

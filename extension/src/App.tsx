@@ -7,6 +7,7 @@ import HomePage from "./pages/home";
 import Profile from "./pages/profile";
 import Insights from "./pages/Insights";
 import Filters from "./pages/filters";
+import Info from "./pages/info";
 
 const queryClient = new QueryClient();
 function App() {
@@ -24,10 +25,12 @@ function App() {
         <Toaster />
 
         {/* You can now use currentPage to conditionally render your page components */}
-        {currentPage === "home" && <HomePage />}
+        {currentPage === "home" && <HomePage goToInfoPage={() => handleNavigate("info")} />}
         {currentPage === "profile" && <Profile />}
         {currentPage === "insights" && <Insights />}
-        {currentPage === "filters" && <Filters />}
+        {currentPage === "filters" &&
+          <Filters goToInfoPage={() => handleNavigate("info")} />}
+        {currentPage === "info" && <Info goToHome={() => handleNavigate("home")} />}
 
         <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
       </div>
