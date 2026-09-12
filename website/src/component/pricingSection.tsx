@@ -1,26 +1,96 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { CheckCircle2 } from "lucide-react"
-import { useEffect, useState } from "react"
-import { listLocalizedPricesResponse } from "../utils/dodoClient"
-
-
+import { CheckCircle2 } from "lucide-react";
+import { supabase } from "../utils/supabase";
+import { toast, ToastContainer } from "react-toastify";
+import type { Session } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
 const PricingSection = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [price, setPrice] = useState(2.7)
-
+  
+const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {
-    const data=listLocalizedPricesResponse;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    console.log("the data pricingsection:",data);
-    setPrice(5);
-  }, [])
+    // 1. Fetch the initial session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
+    // 2. Listen for login/logout events to update state automatically
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    // 3. Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
+  }, []);
+
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Price=2.95;
+
+  const handlePurchase = async () => {
+    console.log("hello there")
+    const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+console.log("SESSION:", session);
+console.log("ACCESS TOKEN:", session?.access_token);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    // Show your login UI
+    return userLogIn();
+  }
+
+  const { data, error } = await supabase.functions.invoke(
+    "create-checkout"
+  );
+  console.log("the data",data);
+
+  if (error) {
+    console.error("Checkout error:", error);
+    toast.error("error while creating checkout session, please contact developer if problem persists.");
+    return;
+  }
+
+  if (!data?.checkout_url) {
+    console.error("No checkout URL returned");
+    toast.error("error while creating checkout session, please contact developer if problem persists.");
+    return;
+  }
+
+ window.location.assign(data.checkout_url);
+};
+
+ async function userLogIn() {
+    try {
+      if (session) return;
+      // it works
+      // OAuth redirects the page, so the loader will spin until the redirect happens
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+    redirectTo: `${window.location.origin}/`,
+        },
+      });
+    
+    } catch (err) {
+      const error = err instanceof Error ? err.message : "unexpected";
+      toast.error(`Error: ${error}`);
+      console.log(`Error:`,err);
+    }
+  }
   return (
      <section
           id="pricing"
           className="py-24 relative bg-black border-t border-slate-900"
         >
+    <ToastContainer/>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-20">
               {/* Badge */}
@@ -35,7 +105,7 @@ const PricingSection = () => {
                 </span>
               </h2>
               <p className="text-lg text-slate-400 font-medium">
-                Start for free. Upgrade once. Own it forever.
+                Start Now. Upgrade once. Own it forever.
               </p>
             </div>
 
@@ -79,7 +149,7 @@ const PricingSection = () => {
 
                   <h3 className="text-2xl font-bold mb-2 text-white">Pro</h3>
                   <div className="text-5xl font-extrabold mb-6 text-white">
-                    ${price?.toFixed(2) || '2.70'}{" "}
+                    ${Price?.toFixed(2) || '2.95'}{" "}
                     <span className="text-lg font-medium text-blue-400">
                       one-time
                     </span>
@@ -110,7 +180,7 @@ const PricingSection = () => {
                     </li>
                   </ul>
 
-                  <button className="w-full bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-xl font-black transition-all shadow-lg hover:scale-[1.02]">
+                  <button onClick={handlePurchase} className="w-full bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-xl font-black transition-all shadow-lg hover:scale-[1.02]">
                     Unlock Lifetime Pro
                   </button>
                 </div>

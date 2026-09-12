@@ -45,12 +45,7 @@ export function youtubeFilterationCheck(
   relativityScore: number,
   userPreferredStrictness: string,
 ) {
-  console.log(
-    "yoututbe filteration check helper,relativityScore;",
-    relativityScore,
-    "userPrefferedStrictness:",
-    userPreferredStrictness,
-  );
+
   switch (userPreferredStrictness) {
     case "relaxed":
       return relativityScore < RELAXED_STRICTNESS_SCORE;
@@ -113,9 +108,6 @@ export function recordFilterResult(
   const ratio = hiddenCount / recentResults.length;
   UpdateFocusScore(ratio);
   if (bannerShownThisSession) {
-    console.log(
-      "[mismatchTracker] banner already shown this session, staying quiet",
-    );
     return;
   }
 
@@ -124,18 +116,10 @@ export function recordFilterResult(
   sinceLastCheck = 0;
 
   if (recentResults.length < WINDOW_SIZE) {
-    console.log(
-      `[mismatchTracker] not enough data yet: ${recentResults.length}/${WINDOW_SIZE}`,
-    );
     return;
   }
 
-  console.log(
-    `[mismatchTracker] checked ratio: ${hiddenCount}/${recentResults.length} = ${ratio.toFixed(3)} (threshold ${MISMATCH_THRESHOLD})`,
-  );
-
   if (ratio >= MISMATCH_THRESHOLD) {
-    console.log("[mismatchTracker] MISMATCH DETECTED — firing banner");
     bannerShownThisSession = true;
     onMismatchDetected();
   }

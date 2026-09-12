@@ -4,7 +4,7 @@ import ext3Image from "/ext3.png";
 import logo from "/trans_logo.png";
 import {
   Sparkles,
-  ArrowRight,
+  Download,
 } from "lucide-react";
 import Feature from "./component/feature";
 import { supabase } from "./utils/supabase";
@@ -19,6 +19,7 @@ import HowItWorks from "./component/howItWorks";
 const Homepage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [downloading,setDownloading]=useState(false);
 
   useEffect(() => {
     // 1. Fetch the initial session on mount
@@ -37,40 +38,6 @@ const Homepage = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handlePurchase = async () => {
-    console.log("hello there")
-    const {
-  data: { session },
-} = await supabase.auth.getSession();
-
-console.log("SESSION:", session);
-console.log("ACCESS TOKEN:", session?.access_token);
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    // Show your login UI
-    return;
-  }
-
-  const { data, error } = await supabase.functions.invoke(
-    "create-checkout"
-  );
-  console.log("the data",data);
-
-  if (error) {
-    console.error("Checkout error:", error);
-    return;
-  }
-
-  if (!data?.checkout_url) {
-    console.error("No checkout URL returned");
-    return;
-  }
- window.location.href = data.checkout_url;
-};
 
   async function userLogIn() {
     try {
@@ -106,6 +73,12 @@ console.log("ACCESS TOKEN:", session?.access_token);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleDownload(){
+    if(downloading)return;
+    setDownloading(true);
+    
   }
 
   return (
@@ -164,8 +137,8 @@ console.log("ACCESS TOKEN:", session?.access_token);
             </button>
 
             {/* Primary Action Button */}
-            <button className="hidden sm:flex group relative bg-white hover:bg-slate-200 text-slate-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 items-center gap-2 overflow-hidden">
-              <span className="relative z-10">Add to Chrome</span>
+            <button onClick={handleDownload} className="hidden sm:flex group relative bg-white hover:bg-slate-200 text-slate-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 items-center gap-2 overflow-hidden">
+              <span className="relative z-10">Download Tubelense</span>
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-slate-400/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite] z-0"></div>
             </button>
 
@@ -187,19 +160,18 @@ console.log("ACCESS TOKEN:", session?.access_token);
             </h1>
 
             <p className="text-lg lg:text-xl text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed font-medium">
-              Take back control of your feed. Filter out distractions
-              automatically with smart, topic-based cards. Choose exactly what
-              you want to see.
+              A chrome extension to take back control of your feed. Filter out distractions
+              automatically with smart, topic-based cards.
             </p>
 
             {/* Buttons and Badge anchored together */}
             <div className="flex flex-col items-center gap-6 w-full sm:w-auto">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button onClick={handlePurchase} className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
-                  Get TubeLens for Free
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <button onClick={handleDownload} className="bg-blue-600 text-white cursor-pointer hover:scale-110 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
+                  {downloading?"getting..":"Get TubeLense"}
+                  <Download className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="bg-slate-900 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
+                <button className="bg-slate-900 cursor-pointer hover:scale-110 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
                   See Pricing
                 </button>
               </div>
@@ -207,7 +179,7 @@ console.log("ACCESS TOKEN:", session?.access_token);
               {/* Web Store Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xs shadow-sm">
                 <Sparkles className="w-4 h-4 text-blue-400" />
-                Now available on Chrome Web Store
+                available exclusively on Tubelense website.
               </div>
             </div>
           </div>

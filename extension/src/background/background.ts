@@ -4,7 +4,6 @@ import { CARD_DATA, YOUTUBE_TOPIC_KEYWORDS } from "../lib/cards";
 import type { PreferencesState, TopicsPack } from "../store/baseInfoStore";
 import { initStore } from "../store/store";
 
-console.log("background.ts loaded", { href: location.href });
 
 let creatingOffscreenDocument: Promise<void> | null = null;
 let userPreferredTopics: string[] | undefined;
@@ -27,19 +26,12 @@ async function hasOffscreenDocument(): Promise<boolean> {
       contextTypes: ["OFFSCREEN_DOCUMENT"],
       documentUrls: [getOffscreenDocumentPath()],
     });
-    try {
-      console.log("hasOffscreenDocument contexts length", contexts.length);
-    } catch (e) {
-      /* ignore */
-      console.log("error in hasOffscreenDocument context length:", e);
-    }
     return contexts.length > 0;
   }
   return false;
 }
 
 function resetReadyGate() {
-  console.log("resetReadyGate called");
   offscreenReady = new Promise((resolve) => {
     resolveOffscreenReady = resolve;
   });
@@ -61,7 +53,6 @@ async function ensureOffscreenDocument() {
     return;
   }
 
-  console.log("creating the offscreen file.");
   resetReadyGate();
 
   creatingOffscreenDocument = chrome.offscreen.createDocument({
@@ -73,7 +64,6 @@ async function ensureOffscreenDocument() {
 
   try {
     await creatingOffscreenDocument;
-    console.log("created offscreen document");
   } finally {
     creatingOffscreenDocument = null;
   }
@@ -93,12 +83,10 @@ async function ensureOffscreenDocument() {
 }
 
 async function checkForAutoScores(text: string) {
-  console.log("the text for checkAutoSScores:",text);
   if (!ignoredChannels) {
     ignoredChannels = ((await chrome.storage.local.get("ignoredChannels"))
       ?.ignoredChannels ?? []) as string[];
   }
-  console.log("the ignoredChannels", ignoredChannels);
 
   const TitleAndChannel = (text as string).split("SPLIT-_-SPLIT");
   const channelCheck = ignoredChannels.includes(TitleAndChannel[1]);
@@ -106,22 +94,15 @@ async function checkForAutoScores(text: string) {
     return true;
   }
 
-  console.log("the channel isn't there for ", TitleAndChannel[1],"moving to check for topicKeywords");
-
   if (isStandardCard && cardName) {
-    console.log("got into topic keywords")
     const topicKeywords =
       YOUTUBE_TOPIC_KEYWORDS[cardName.toUpperCase() as keyof typeof YOUTUBE_TOPIC_KEYWORDS];
-      console.log("the topicKeywords for the cardName:",cardName,"is:",topicKeywords);
     if (!topicKeywords) return false;
 
-    console.log("we have got the topicKeywords",topicKeywords,"for th cardName:",cardName);
     const JoinedTitleAndChannel = TitleAndChannel.join(" ").toLowerCase();
-    console.log("the joined title and channel:",JoinedTitleAndChannel);
     const check = topicKeywords.some((keyword: string) =>
       JoinedTitleAndChannel.includes(keyword),
     );
-    console.log("the check for topicKeywords:",check,"for card Name",cardName,"and title and channel:",JoinedTitleAndChannel);
     if (check === true) return true;
   }
 
@@ -131,7 +112,6 @@ async function checkForAutoScores(text: string) {
 // Listen for the offscreen document's "I'm ready" ping.
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.target === "offscreen-ready") {
-    console.log("offscreen document signalled ready.");
     if (!resolveOffscreenReady) resetReadyGate();
     resolveOffscreenReady?.();
   }
@@ -143,11 +123,8 @@ async function sendToOffscreen(payload: any, attempts = 3): Promise<any> {
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await chrome.runtime.sendMessage(payload);
-      if (res === undefined)
-        console.log("sendToOffscreen got undefined response, attempt", i + 1);
       if (res !== undefined) return res;
     } catch (err) {
-      console.log("sendToOffscreen attempt failed", i + 1, err);
       if (i === attempts - 1) throw err;
     }
     await new Promise((r) => setTimeout(r, 300 * (i + 1)));
@@ -156,7 +133,6 @@ async function sendToOffscreen(payload: any, attempts = 3): Promise<any> {
 }
 
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
-  console.log("background storage.onChanged", { changes, areaName });
   if (areaName !== "local") return;
 
   const preferenceChange = changes.preference;
@@ -185,7 +161,6 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  console.log("background onMessage received", message);
   if (message?.target === "offscreen") {
     return false;
   }
@@ -209,12 +184,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         }
       }
       try {
-        console.log(
-          "message",
-          message,
-          "the splitted messsage not 1:",
-          (message.text as string).split("SPLIT-_-SPLIT"),
-        );
         const check = await checkForAutoScores(message.text as string);
         if (check === true) {
           sendResponse({
@@ -244,10 +213,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         const channelAndTitleSorted = message.text
           .split("SPLIT-_-SPLIT")
           .join("");
-        console.log(
-          "channelAndTitleSorted before sending to offscreen:",
-          channelAndTitleSorted,
-        );
+        
         const res = await sendToOffscreen({
           target: "offscreen",
           task: "evaluate_relativity",
@@ -268,7 +234,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.action === "OPEN_POPUP_REQUEST") {
     chrome.action.openPopup().catch(() => {
-      console.log("could not open the banner.");
       // not supported on this Chrome version — nothing to do, user can still click the icon manually
     });
   }

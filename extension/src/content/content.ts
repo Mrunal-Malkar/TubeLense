@@ -8,35 +8,14 @@ import { type PreferencesState } from "../store/baseInfoStore";
 // current page's hostname. Add a new `case` + real start/stop functions
 // (mirroring the Youtube* pattern above) when adding support for a new site.
 async function startFilteringForCurrentSite() {
-  console.log("called startingFiltering function")
   const host = window.location.hostname;
   const hostName: string = getHostName(host) ?? "";
-  console.log("this is the hostName:",hostName)
-  // chrome.storage.local.get returns a Promise in Manifest V3 context (or takes a callback).
-  // Await the promise and extract preference safely.
-  const prefs = await chrome.storage.local.get("preference");
-  console.log("the prefs is",prefs);
   switch (hostName) {
     case "yt":
-      console.log("starting to filter (youtube)");
-    console.log("calling startYoutubeFiltering switch case")
       startYoutubeFiltering();
       break;
 
-    // case "x":
-    // if(sites.x!=true)break;
-    // case hostname.includes("x.com"):
-    //   console.log("starting to filter (twitter)");
-    //   startTwitterFiltering();
-    //   break;
-
-    // case hostname.includes("reddit.com"):
-    //   console.log("starting to filter (reddit)");
-    //   startRedditFiltering();
-    //   break;
-
     default:
-      console.log("no filtering logic for this site", hostName);
   }
 }
 
@@ -45,62 +24,27 @@ function stopFilteringForCurrentSite() {
 
   switch (true) {
     case hostname.includes("youtube.com"):
-      console.log("stopping filter (youtube)");
       stopYoutubeFiltering();
       break;
 
-    // case hostname.includes("twitter.com"):
-    // case hostname.includes("x.com"):
-    //   console.log("stopping filter (twitter)");
-    //   stopTwitterFiltering();
-    //   break;
-
-    // case hostname.includes("reddit.com"):
-    //   console.log("stopping filter (reddit)");
-    //   stopRedditFiltering();
-    //   break;
-
     default:
-      console.log("no filtering logic for this site", hostname);
   }
 }
 
-// --- Dummy stubs for other sites (implement when adding support) ---
-// function startTwitterFiltering() {
-//   console.log("startTwitterFiltering called (not implemented)");
-// }
-// function stopTwitterFiltering() {
-//   console.log("stopTwitterFiltering called (not implemented)");
-// }
-// function startRedditFiltering() {
-//   console.log("startRedditFiltering called (not implemented)");
-// }
-// function stopRedditFiltering() {
-//   console.log("stopRedditFiltering called (not implemented)");
-// }
-
 // --- Initialize State ---
 chrome.storage.local.get(["lens_active"], (result) => {
-  console.log("reult:", result.lens_active);
   if (result.lens_active === true) {
-    console.log("starting to filter");
     startFilteringForCurrentSite();
-  } else {
-    console.log("extension state is not active yet", result);
-  }
-});
+  }});
 
 // --- Listen for Real-time Changes (from Popup) ---
 chrome.storage.onChanged.addListener((changes, namespace) => {
-  console.log("storage changed", { namespace, changes });
   if (namespace != "local") return;
 
   if (changes.lens_active) {
     if (changes.lens_active.newValue == true) {
-      console.log("starting the filtering.");
       startFilteringForCurrentSite();
     } else {
-      console.log("stopping the filtering", changes.lens_active);
       stopFilteringForCurrentSite();
     }
   } else if (changes.preference) {
@@ -112,7 +56,6 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       alterSitesProcessing({ sitesNew, sitesOld });
     }
     if(preferenceNew.strictness!=preferenceOld.strictness){
-      console.log("rebooting the site...")
       rebootCurrentSite();
     }
   }
@@ -149,7 +92,6 @@ function alterSitesProcessing({
   sitesNew: PreferencesState["sites"];
   sitesOld: PreferencesState["sites"];
 }) {
-  console.log("got the two arguments", { sitesNew, sitesOld });
   for (const site in sitesNew) {
     const siteKey = site as keyof typeof sitesNew;
     if (sitesNew[siteKey] !== sitesOld[siteKey]) {
@@ -163,25 +105,20 @@ function alterSitesProcessing({
 }
 
 export async function getRelativityScore(videoTitle: string) {
-  console.log("sending relativity check for video", videoTitle);
   try {
     const response = await chrome.runtime.sendMessage({
       task: "evaluate_relativity",
       text: videoTitle,
     });
-    console.log(
-      "relativity response received",
-      response,
-      "as number",
-      Number(response.similarity),
-    );
     if (!response.success) return 2;
 
     return Number(response.similarity);
   } catch (error) {
-    console.log("getYoutubeRelativityScore failed", error);
-    return 1;
+    if(error){
+      return 1;
+    }
   }
+  return 1;
 }
 
 async function rebootCurrentSite() {
@@ -189,7 +126,6 @@ async function rebootCurrentSite() {
   const site = getHostName(host);
 
   if (!site) {
-    console.log("Cannot reboot: unsupported site", host);
     return;
   }
 
@@ -197,38 +133,29 @@ async function rebootCurrentSite() {
   const stopFunction = getSiteFunction[`${site}Stop`];
 
   if (!startFunction || !stopFunction) {
-    console.log("No start/stop functions for site", site);
     return;
   }
 
-  console.log(`Rebooting ${site}...`);
 
   await stopFunction();
   await startFunction();
 
-  console.log(`${site} reboot completed`);
 }
 
 const getSiteFunction = {
   ytStart: startYoutubeFiltering,
   instaStart: () => {
-    console.log("insta start not implemented");
   },
   xStart: () => {
-    console.log("x start not implemented");
   },
   googleStart: () => {
-    console.log("google start not implemented");
   },
   ytStop: stopYoutubeFiltering,
   instaStop: () => {
-    console.log("insta stop not implemented");
   },
   xStop: () => {
-    console.log("x stop not implemented");
   },
   googleStop: () => {
-    console.log("google stop not implemented");
   },
 } as any;
 const getHostName = (host: string) => {

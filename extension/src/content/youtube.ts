@@ -12,7 +12,6 @@ import type { PreferencesState } from "../store/baseInfoStore";
 import { getRelativityScore } from "./content";
 import { showMismatchBanner } from "../components/small_components/MismatchedBanner";
 
-console.log("youtube.ts loaded", { href: location.href });
 
 let youtubeObserver: MutationObserver | null = null;
 let youtubeNavigateFinishHandler: (() => void) | null = null;
@@ -69,7 +68,6 @@ function applyRevealStyle(
   meta: { key: string; title: string; channelName: string; score: number },
 ) {
   if (check) {
-    console.log("making it go invisible.")
     el.style.opacity = "0";
     el.style.filter = "blur(6px)";
     setTimeout(() => {
@@ -81,9 +79,7 @@ function applyRevealStyle(
       title: meta.title,
       channelName: meta.channelName,
       score: meta.score,
-    }).catch((err) =>
-      console.log("[youtube] failed to record blocked video", err),
-    );
+    })
   } else {
     el.style.display = "";
     el.style.opacity = "1";
@@ -124,7 +120,6 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") return;
   const preference = changes.preference?.newValue as PreferencesState;
   if (preference) {
-    console.log("youtube.ts message event preference:", preference);
     userPrefferedStrictness = preference.strictness;
   }
 });
@@ -210,12 +205,6 @@ async function scoreVideoElement(
 
   try {
     const relativityScore = await getRelativityScore(key);
-    console.log(
-      "got the relativity score in youtube.ts for title",
-      currentTitle,
-      "it's",
-      relativityScore,
-    );
     if (!userPrefferedStrictness) {
       const result = await chrome.storage.local.get("preference");
       const preference = result.preference as PreferencesState;
@@ -225,16 +214,13 @@ async function scoreVideoElement(
     const check =
       youtubeFilterationCheck(relativityScore, userPrefferedStrictness) ??
       false;
-    console.log("this is the check.", check, "for", currentTitle);
     scoredThisPass.set(key, { score: relativityScore, check });
-    console.log("going in", currentTitle, "for applyRevealStyle");
     applyRevealStyle(el, check, {
       key,
       title: currentTitle,
       channelName: currentChannelName ?? "",
       score: relativityScore,
     });
-    console.log("done with the applyRevealStyle");
     recordFilterResult(check, () => {
       showMismatchBanner({
         onAdjustStrictness: () => {
@@ -266,14 +252,10 @@ async function scoreVideoElement(
 // --- Discovery pass: finds new video nodes, blurs them immediately, and
 // hands them to the IntersectionObserver instead of scoring right away ---
 export function processYoutubeVideos() {
-  console.log("called processYoutubeVideos");
-
   const videoElements = getTopLevelVideoElements();
   const observer = getIntersectionObserver();
-  console.log("the videoElements:",videoElements);
 
   videoElements.forEach((videoContainer) => {
-    console.log("running forEach on videoElements")
     // already discovered & being watched/scored — skip
     if (videoContainer.hasAttribute("data-extension-observed")) return;
 
@@ -314,18 +296,14 @@ export const scheduleProcessYoutubeVideos = debounce(() => {
 
 // --- Lifecycle Management ---
 export async function startYoutubeFiltering() {
-  console.log("startYoutubeFiltering called function");
   if (youtubeObserver) return;
-console.log("youtubeobserver not found.")
   if (document.readyState === "loading") {
-    console.log("still in loading state so sending back.")
     await new Promise<void>((resolve) =>
       document.addEventListener("DOMContentLoaded", () => resolve(), {
         once: true,
       }),
     );
   }
-  console.log("creating new mutation observer.")
   youtubeObserver = new MutationObserver(() => scheduleProcessYoutubeVideos());
   youtubeObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -339,13 +317,11 @@ console.log("youtubeobserver not found.")
   };
 
   document.addEventListener("yt-navigate-finish", youtubeNavigateFinishHandler);
-  console.log("about to call processYotubeVideos")
 
   processYoutubeVideos();
 }
 
 export function stopYoutubeFiltering() {
-  console.log("stopYoutubeFiltering called");
   if (youtubeObserver) {
     youtubeObserver.disconnect();
     youtubeObserver = null;

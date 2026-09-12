@@ -58,8 +58,8 @@ const Terms_Of_Services = () => {
 
   <hr className="my-8 border-gray-300" />
 
-  <h2 className="text-2xl font-bold mt-8 mb-4">5. Free and Paid Features</h2>
-  <p>TubeLense may offer both free and paid functionality.</p>
+  <h2 className="text-2xl font-bold mt-8 mb-4">5. Features</h2>
+  <p>TubeLense offer paid functionality.</p>
   <p>We may change, add, remove, or modify features over time.</p>
   <p>Paid features may require a one-time purchase or another pricing model explicitly presented at the time of purchase.</p>
   <p>The specific price (inclusive of applicable Indian taxes such as GST, where applicable) and features applicable to your purchase will be displayed before you complete the transaction, in accordance with the Consumer Protection (E-Commerce) Rules, 2020.</p>
@@ -72,7 +72,7 @@ const Terms_Of_Services = () => {
   <ul className="list-disc pl-6 mb-4 space-y-1">
     <li>TubeLense will operate indefinitely;</li>
     <li>Every future feature will be included;</li>
-    <li>The Service will support every future version of Chrome or YouTube;</li>
+    <li>The Service will not necessarily support every future version of Chrome or YouTube;</li>
     <li>TubeLense will remain compatible with third-party platforms indefinitely.</li>
   </ul>
   <p>We may change the pricing, availability, or distribution of TubeLense in the future. Making a feature or the Service available for free does not, by itself, constitute a cancellation or revocation of a previously purchased lifetime license, provided that we continue to offer the applicable Service.</p>
@@ -108,7 +108,7 @@ const Terms_Of_Services = () => {
   <p>TubeLense does not control these third-party platforms.</p>
   <p>Changes to YouTube, Chrome, browser APIs, content structures, policies, authentication systems, or other third-party technologies may cause some or all TubeLense functionality to stop working, change behavior, or require updates.</p>
   <p>TubeLense does not guarantee uninterrupted compatibility with third-party platforms.</p>
-  <p>Your use of YouTube and Chrome remains subject to their respective terms, policies, and rules, and to the Chrome Web Store Developer Program Policies and Google's applicable terms.</p>
+  <p>Your use of YouTube and Chrome remains subject to their respective terms, policies, and rules and Google's applicable terms.</p>
 
   <hr className="my-8 border-gray-300" />
 
@@ -212,7 +212,7 @@ const Terms_Of_Services = () => {
     <li>Google, for authentication;</li>
     <li>Supabase, for authentication, database, and infrastructure services;</li>
     <li>Dodo Payments, for payment processing and Merchant of Record services;</li>
-    <li>Google Chrome and the Chrome Web Store, for browser and extension functionality;</li>
+    <li>Google Chrome for browser and extension functionality;</li>
     <li>YouTube, for video and platform functionality.</li>
   </ul>
   <p>Your use of third-party services may be subject to their own terms and policies.</p>
