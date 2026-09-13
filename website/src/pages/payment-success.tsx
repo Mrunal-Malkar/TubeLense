@@ -98,10 +98,10 @@ export default function PaymentSuccess() {
 
         {/* Continue */}
         <Link
-          to="/"
+          to="/afterDownload"
           className="mt-8 block w-full rounded-xl bg-white px-5 py-3 text-center font-semibold text-black transition hover:bg-white/90"
         >
-          Back to TubeLense
+          "Download TubeLense"
         </Link>
 
       </div>

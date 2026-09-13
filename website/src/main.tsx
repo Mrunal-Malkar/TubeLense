@@ -8,6 +8,7 @@ import Refund_Policy from './pages/refund_policy.tsx';
 import Contact from './pages/contact.tsx';
 import PaymentSuccess from './pages/payment-success.tsx';
 import PaymentFailed from './pages/payment-failed.tsx';
+import AfterDownload from './pages/afterDownload.tsx';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
   {
     path:"payment-success",
     element:<PaymentSuccess/>
+  },
+  {
+    path:"afterDownload",
+    element:<AfterDownload/>
   },
   {
     path:"payment-failed",

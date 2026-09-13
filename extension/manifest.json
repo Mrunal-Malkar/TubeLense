@@ -1,16 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "My Vite Extension",
-  "version": "1.0.0",
+  "name": "TubeLense",
+    "description": "See less noise. Watch more of what matters. Fast,Secure and Local for your youtube feed.",
+  "version": "2.0",
   "action": {
-    "default_popup": "index.html",
-    "default_icon":{
-      "16":"favicon.png",
-      "18":"favicon.png",
-      "20":"favicon.png"
-    }
+     "default_popup": "index.html",
+  "default_icon": {
+    "16": "favicon.png",
+    "32": "favicon.png"
+  }
   },
-  "icons":{"16":"favicon.png","18":"favicon.png","20":"favicon.png"},
+  "icons": {
+  "16": "favicon.png",
+  "32": "favicon.png",
+  "48": "favicon.png",
+  "128": "favicon.png"
+},
   "permissions":["activeTab","scripting","storage","offscreen"],
   "background": {
     "service_worker": "src/background/background.ts",
@@ -18,7 +23,7 @@
   },
   "content_scripts": [{
   "matches": ["*://*.youtube.com/*"],
-  "js": ["src/content/content.ts","src/content/youtube.ts", "src/content/x.ts", "src/content/instagram.ts","src/content/google.ts"]
+  "js": ["src/content/content.ts","src/content/youtube.ts"]
 }]
 ,"content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"

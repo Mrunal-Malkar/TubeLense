@@ -3,23 +3,23 @@ import ext2Image from "/ext2.png";
 import ext3Image from "/ext3.png";
 import logo from "/trans_logo.png";
 import {
-  Sparkles,
   Download,
+  Settings // <-- Added Settings icon
 } from "lucide-react";
 import Feature from "./component/feature";
 import { supabase } from "./utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
 import { useState, useEffect } from "react";
-import {type Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import Footer from "./component/footer";
 import PricingSection from "./component/pricingSection";
 import HowItWorks from "./component/howItWorks";
-// Make sure to import your supabase client and toast here
+import SetupGuide from "./component/setupGuide";
 
 const Homepage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [downloading,setDownloading]=useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     // 1. Fetch the initial session on mount
@@ -38,25 +38,22 @@ const Homepage = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-
   async function userLogIn() {
     try {
       setIsLoading(true);
       if (session) return;
-      // it works
-      // OAuth redirects the page, so the loader will spin until the redirect happens
+      
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-    redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/`,
         },
       });
-    
     } catch (err) {
       const error = err instanceof Error ? err.message : "unexpected";
       toast.error(`Error: ${error}`);
-      console.log(`Error:`,err);
-      setIsLoading(false); // Only turn off loading if there's an error (preventing redirect)
+      console.log(`Error:`, err);
+      setIsLoading(false); 
     }
   }
 
@@ -75,10 +72,9 @@ const Homepage = () => {
     }
   }
 
-  function handleDownload(){
-    if(downloading)return;
+  function handleDownload() {
+    if (downloading) return;
     setDownloading(true);
-    
   }
 
   return (
@@ -86,7 +82,7 @@ const Homepage = () => {
       <ToastContainer />
       
       {/* Playful Floating Navbar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 bg-black/70 backdrop-blur-xl border border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.4)] rounded-full px-4 sm:px-6 py-3">
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-8xl z-50 bg-black/70 backdrop-blur-xl border border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.4)] rounded-full px-4 sm:px-6 py-3">
         <div className="flex justify-between items-center">
           
           {/* Logo Area */}
@@ -96,10 +92,10 @@ const Homepage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="font-black text-xl tracking-tight text-white">
-                TubeLens
+                TubeLense
               </span>
               <span className="hidden sm:inline-block bg-indigo-500/10 text-indigo-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-indigo-500/20 uppercase tracking-widest shadow-sm">
-                Beta
+                2.0
               </span>
             </div>
           </div>
@@ -115,12 +111,13 @@ const Homepage = () => {
             <a href="#pricing" className="text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 px-5 py-2 rounded-full transition-all shadow-sm shadow-transparent hover:shadow-slate-900/50">
               Pricing
             </a>
+            <a href="#setup-guide" className="text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 px-5 py-2 rounded-full transition-all shadow-sm shadow-transparent hover:shadow-slate-900/50">
+              Setup
+            </a>
           </div>
 
           {/* Right side CTA & Auth */}
           <div className="flex-1 flex justify-end items-center gap-3">
-            
-            {/* Auth Button */}
             <button 
               onClick={session ? userLogOut : userLogIn}
               disabled={isLoading}
@@ -136,12 +133,10 @@ const Homepage = () => {
               )}
             </button>
 
-            {/* Primary Action Button */}
             <button onClick={handleDownload} className="hidden sm:flex group relative bg-white hover:bg-slate-200 text-slate-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 items-center gap-2 overflow-hidden">
               <span className="relative z-10">Download Tubelense</span>
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-slate-400/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite] z-0"></div>
             </button>
-
           </div>
         </div>
       </nav>
@@ -151,7 +146,6 @@ const Homepage = () => {
         <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center justify-start min-h-screen">
           {/* Foreground Text & CTA */}
           <div className="relative z-20 text-center flex flex-col items-center bg-transparent max-w-3xl w-full mb-16">
-            {/* Clean Headline */}
             <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] m-0 text-white mb-6">
               Watch <br className="sm:hidden" />
               <span className="text-emerald-400 drop-shadow-[0_0_25px_rgba(52,211,153,0.2)]">
@@ -160,26 +154,31 @@ const Homepage = () => {
             </h1>
 
             <p className="text-lg lg:text-xl text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed font-medium">
-              A chrome extension to take back control of your feed. Filter out distractions
+              A chrome extension to take back control of your youtube feed.Filter out distractions
               automatically with smart, topic-based cards.
             </p>
 
             {/* Buttons and Badge anchored together */}
             <div className="flex flex-col items-center gap-6 w-full sm:w-auto">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button onClick={handleDownload} className="bg-blue-600 text-white cursor-pointer hover:scale-110 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
-                  {downloading?"getting..":"Get TubeLense"}
-                  <Download className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <button onClick={handleDownload} className="bg-blue-600 text-white cursor-pointer hover:scale-105 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
+                  {downloading ? "Preparing file..." : "Get TubeLense"}
+                  <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                 </button>
-                <button className="bg-slate-900 cursor-pointer hover:scale-110 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
+                <button className="bg-slate-900 cursor-pointer hover:scale-105 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
                   See Pricing
                 </button>
               </div>
 
-              {/* Web Store Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xs shadow-sm">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                available exclusively on Tubelense website.
+              {/* Expectations Badge: Replaced the Web Store badge */}
+              <div className="flex flex-col items-center gap-2 mt-1">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/60 border border-slate-700/50 text-slate-300 font-semibold text-xs shadow-sm backdrop-blur-sm">
+                  <Settings className="w-3.5 h-3.5 text-blue-400" />
+                  Independent Extension • 1-minute manual setup
+                </div>
+                <a href="#setup-guide" className="text-[11px] text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
+                  View installation guide
+                </a>
               </div>
             </div>
           </div>
@@ -205,15 +204,11 @@ const Homepage = () => {
         </section>
 
         <Feature />
-
-        {/* How it Works Section */}
         <HowItWorks/>
-
-        {/* Pricing Section */}
-       <PricingSection />
+        <PricingSection />
+        <SetupGuide/>
       </main>
 
-      {/* Footer */}
       <Footer/>
     </div>
   );

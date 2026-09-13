@@ -41,9 +41,9 @@ export interface Sites{
 const initialState: PreferencesState = {
   schemaVersion: 1,
   activeMode: "custom",
-  activeTopicPack: "My Topics",
+  activeTopicPack: "NO BS",
   focusScore: 0,
-  strictness:"balanced",
+  strictness:"relaxed",
   ignoredChannels:[],
   sites: {
     yt: true,
@@ -53,11 +53,12 @@ const initialState: PreferencesState = {
   },
   topicsPack: [
     {
-      label: "My Topics",
-      topics: [
-        { id: "1", topic: "react" },
-        { id: "2", topic: "machine learning" },
-      ],
+      label: "NO BS",
+    topics: [
+      {id:"1",topic:"Practical tutorials that teach a clear, useful skill step by step."},{
+      id:"2",topic:"Educational content focused on learning, solving, or building something real."},{
+      id:"3",topic:"Direct, efficient explanations delivered by someone knowledgeable and to the point."}
+    ],
     },
   ],
 
@@ -65,7 +66,6 @@ const initialState: PreferencesState = {
     selectedCardName: CARD_NAME.NO_BS,
   },
 };
-
 export const preferencesSlice = createSlice({
   name: "preference",
   initialState,

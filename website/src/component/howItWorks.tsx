@@ -11,7 +11,7 @@ const HowItWorks = () => {
           <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-900/20 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-5xl border-[2px] border-dashed border-slate-800/60 rounded-[4rem] pointer-events-none" />
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-4 relative z-10">
             {/* Heading */}
             <div className="text-center mb-20">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-950/50 text-indigo-400 font-black text-xs mb-6 uppercase tracking-widest border border-indigo-500/20">
