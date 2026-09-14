@@ -88,7 +88,7 @@ const Homepage = () => {
           {/* Logo Area */}
           <div className="flex items-center gap-3 flex-1 cursor-pointer group">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 transform -rotate-6 group-hover:rotate-0 transition-transform duration-300 border border-slate-800">
-              <img src={logo} alt="Tubelens logo" />
+              <img src={logo} alt="Tubelense logo" />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-black text-xl tracking-tight text-white">

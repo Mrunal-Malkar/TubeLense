@@ -6,11 +6,11 @@ export default function Header({ goToInfoPage }: { goToInfoPage: () => void }){
     <div className="flex justify-between items-center z-10">
       <div className="flex items-center gap-2">
         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-          <img src={finaLogo} alt="TubeLens Logo" className="w-full object-fill" />
+          <img src={finaLogo} alt="TubeLense Logo" className="w-full object-fill" />
         </div>
         <div>
           <h1 className="font-semibold text-black tracking-tight text-lg flex items-center gap-1.5">
-            TubeLens <Sparkles size={16} strokeWidth={1.5} className="text-blue-400" />
+            TubeLense <Sparkles size={16} strokeWidth={1.5} className="text-blue-400" />
           </h1>
           <p className="text-xs text-gray-500">Keeping you intentional.</p>
         </div>

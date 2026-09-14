@@ -11,7 +11,7 @@ const SetupGuide = () => {
           1-Minute <span className="text-blue-500">Setup Guide</span>
         </h2>
         <p className="text-lg text-slate-400 font-medium">
-          Because TubeLens is completely independent and not bound by Web Store restrictions, installation takes a few simple manual steps.
+          Because TubeLense is completely independent and not bound by Web Store restrictions, installation takes a few simple manual steps.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ const SetupGuide = () => {
             <Download size={24} />
           </div>
           <h4 className="text-white font-bold mb-1">2. Auto-Download</h4>
-          <p className="text-xs text-slate-400">Your TubeLens .zip file will download instantly after payment.</p>
+          <p className="text-xs text-slate-400">Your TubeLense .zip file will download instantly after payment.</p>
         </div>
       </div>
 
@@ -51,7 +51,7 @@ const SetupGuide = () => {
             </h3>
             <p className="text-slate-400 leading-relaxed text-lg">
               Chrome cannot install raw `.zip` files, so you need to extract it first. <br/><br/>
-              Locate the downloaded <strong>TubeLens.zip</strong> file. Right-click it and select <strong>"Extract All..."</strong> (Windows) or double-click it (Mac) to unzip it into a regular folder. Remember where you saved this extracted folder!
+              Locate the downloaded <strong>TubeLense.zip</strong> file. Right-click it and select <strong>"Extract All..."</strong> (Windows) or double-click it (Mac) to unzip it into a regular folder. Remember where you saved this extracted folder!
             </p>
           </div>
           {/* Image Placeholder */}

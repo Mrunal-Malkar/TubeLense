@@ -1,8 +1,10 @@
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
+  const [count, setCount] = useState(10);
 
   // Get values from Dodo's redirect URL
   const paymentId =
@@ -16,13 +18,25 @@ export default function PaymentSuccess() {
   const customerName =
     searchParams.get("name") ||
     searchParams.get("customer_name");
+    const navigate=useNavigate();
 
-  // Get every parameter Dodo sent
-  const dodoParams = Object.fromEntries(
-    searchParams.entries()
-  );
 
-  console.log("Dodo redirect data:", dodoParams);
+    setTimeout(()=>navigate("/afterDownload"),10000);
+    
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCount((prev) => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black px-6">
@@ -103,7 +117,7 @@ export default function PaymentSuccess() {
         >
           "Download TubeLense"
         </Link>
-
+          <p className="text-gray-400 ms-1.5">redirecting to download page in {count}</p>
       </div>
     </div>
   );
