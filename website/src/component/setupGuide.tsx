@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CreditCard, Download, Settings, FolderUp, CheckCircle2, FileArchive } from 'lucide-react';
 
 const SetupGuide = () => {
