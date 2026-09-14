@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Carousel from '../components/topicsCarousel';
 import StrictnessToggle from '../components/strictnessToggle';
 import { useDispatch, useSelector } from 'react-redux';
