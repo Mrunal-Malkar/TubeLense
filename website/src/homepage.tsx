@@ -15,11 +15,13 @@ import Footer from "./component/footer";
 import PricingSection from "./component/pricingSection";
 import HowItWorks from "./component/howItWorks";
 import SetupGuide from "./component/setupGuide";
+import { useNavigate } from "react-router";
 
 const Homepage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [isPaid,setIsPaid]=useState(false);
+  const navigate=useNavigate();
 
   useEffect(() => {
     // 1. Fetch the initial session on mount
@@ -73,8 +75,64 @@ const Homepage = () => {
   }
 
   function handleDownload() {
-    if (downloading) return;
-    setDownloading(true);
+    if(!session)return userLogIn();
+    navigate("/afterDownload");
+  }
+
+  useEffect(()=>{
+    const checkPaymentStatus = async () => {
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+        if (userError || !user) {
+          setIsPaid(false);
+          return;
+        }
+
+        // Fetch the specific user's profile to check access
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("has_lifetime_access")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          setIsPaid(false);
+        } else {
+          setIsPaid(!!data?.has_lifetime_access);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkPaymentStatus();
+  },[])
+
+  async function handleGetTubeLense(){
+    if(!session)return userLogIn();
+    if(isPaid==true){toast.info("already purchased"); navigate("/afterDownload")};
+      const { data, error } = await supabase.functions.invoke(
+    "create-checkout"
+  );
+  console.log("the data",data);
+
+  if (error) {
+    console.error("Checkout error:", error);
+    toast.error("error while creating checkout session, please contact developer if problem persists.");
+    return;
+  }
+
+  if (!data?.checkout_url) {
+    console.error("No checkout URL returned");
+    toast.error("error while creating checkout session, please contact developer if problem persists.");
+    return;
+  }
+
+ navigate(data.checkout_url);
   }
 
   return (
@@ -121,7 +179,7 @@ const Homepage = () => {
             <button 
               onClick={session ? userLogOut : userLogIn}
               disabled={isLoading}
-              className="group relative flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-300 hover:text-white bg-transparent hover:bg-slate-800/80 border border-slate-700/60 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group hover:cursor-pointer relative flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-300 hover:text-white bg-transparent hover:bg-slate-800/80 border border-slate-700/60 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <svg className="animate-spin h-4 w-4 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -161,11 +219,11 @@ const Homepage = () => {
             {/* Buttons and Badge anchored together */}
             <div className="flex flex-col items-center gap-6 w-full sm:w-auto">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button onClick={handleDownload} className="bg-blue-600 text-white cursor-pointer hover:scale-105 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
-                  {downloading ? "Preparing file..." : "Get TubeLense"}
+                <button onClick={handleGetTubeLense} className="bg-blue-600 text-white cursor-pointer hover:scale-105 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
+                  {"Get TubeLense"}
                   <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                 </button>
-                <button className="bg-slate-900 cursor-pointer hover:scale-105 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
+                <button onClick={()=>navigate("#pricing")} className="bg-slate-900 hover:cursor-pointer cursor-pointer hover:scale-105 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
                   See Pricing
                 </button>
               </div>
@@ -205,7 +263,7 @@ const Homepage = () => {
 
         <Feature />
         <HowItWorks/>
-        <PricingSection />
+        <PricingSection handleGetTubeLense={handleGetTubeLense}/>
         <SetupGuide/>
       </main>
 
