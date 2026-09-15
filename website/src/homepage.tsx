@@ -76,6 +76,7 @@ const Homepage = () => {
 
   function handleDownload() {
     if(!session)return userLogIn();
+    if(!isPaid)handleGetTubeLense();
     navigate("/afterDownload");
   }
 
@@ -118,21 +119,18 @@ const Homepage = () => {
       const { data, error } = await supabase.functions.invoke(
     "create-checkout"
   );
-  console.log("the data",data);
 
   if (error) {
-    console.error("Checkout error:", error);
     toast.error("error while creating checkout session, please contact developer if problem persists.");
     return;
   }
 
   if (!data?.checkout_url) {
-    console.error("No checkout URL returned");
     toast.error("error while creating checkout session, please contact developer if problem persists.");
     return;
   }
 
- navigate(data.checkout_url);
+  window.location.href=data.checkout_url;
   }
 
   return (
@@ -223,9 +221,9 @@ const Homepage = () => {
                   {"Get TubeLense"}
                   <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                 </button>
-                <button onClick={()=>navigate("#pricing")} className="bg-slate-900 hover:cursor-pointer cursor-pointer hover:scale-105 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
+                <a href="/#pricing" className="bg-slate-900 hover:cursor-pointer cursor-pointer hover:scale-105 text-white border-2 border-slate-700 px-8 py-4 rounded-xl font-bold text-base hover:border-slate-500 hover:bg-slate-800 transition-all flex items-center justify-center w-full sm:w-auto shadow-sm">
                   See Pricing
-                </button>
+                </a>
               </div>
 
               {/* Expectations Badge: Replaced the Web Store badge */}

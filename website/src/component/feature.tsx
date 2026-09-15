@@ -92,7 +92,7 @@ const Feature = () => {
             <div className="h-[540px] rounded-[1.25rem] overflow-hidden bg-slate-900 border border-slate-800 relative shadow-inner">
               <iframe 
                 className="w-full h-full pointer-events-auto"
-                src="https://www.youtube.com/embed/jfKfPfyJRdk?si=hT02X_W97j-Gf7PZ" 
+                src="https://youtu.be/xOD69LngPzI" 
                 title="YouTube video player" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 

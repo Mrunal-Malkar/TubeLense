@@ -14,12 +14,12 @@ const Price=2.95;
             <div className="text-center mb-20">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-950/50 text-blue-400 font-black text-xs mb-6 uppercase tracking-widest border border-blue-900/50">
-                Simple Pricing
+                Best offer
               </div>
 
               <h2 className="text-3xl lg:text-5xl font-black mb-6 text-white">
                 Invest in your{" "}
-                <span className="inline-block bg-slate-900 text-white px-4 py-1 rounded-xl ml-1 border border-slate-800">
+                <span className="inline-block bg-slate-900 text-emerald-400 px-4 py-1 rounded-xl ml-1 border border-slate-800">
                   attention.
                 </span>
               </h2>
@@ -71,7 +71,7 @@ const Price=2.95;
                     </li>
                   </ul>
 
-                  <button onClick={handleGetTubeLense} className="w-full bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-xl font-black transition-all shadow-lg hover:scale-[1.02]">
+                  <button onClick={handleGetTubeLense} className="w-full hover:cursor-pointer bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-xl font-black transition-all shadow-lg hover:scale-[1.02]">
                     Unlock Lifetime Pro
                   </button>
                 </div>
