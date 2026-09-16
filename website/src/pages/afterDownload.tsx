@@ -39,8 +39,9 @@ const AfterDownload = () => {
     const checkPaymentStatus = async () => {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
+        console.log("data at afterDownload",user);
         if (userError || !user) {
+          console.log("error at afterDownload:",userError);
           setIsPaid(false);
           return;
         }
@@ -52,6 +53,7 @@ const AfterDownload = () => {
           .eq("id", user.id)
           .single();
 
+          console.log("the has_liffetime_acess at afterDownload",data);
         if (error) {
           console.error("Error fetching profile:", error);
           setIsPaid(false);
