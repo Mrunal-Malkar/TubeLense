@@ -4,8 +4,9 @@ import ext3Image from "/ext3.png";
 import logo from "/trans_logo.png";
 import {
   Download,
-  Settings // <-- Added Settings icon
+  Settings
 } from "lucide-react";
+import youtubeIcon from "../public/youtube.png"
 import Feature from "./component/feature";
 import { supabase } from "./utils/supabase";
 import { toast, ToastContainer } from "react-toastify";
@@ -15,13 +16,11 @@ import Footer from "./component/footer";
 import PricingSection from "./component/pricingSection";
 import HowItWorks from "./component/howItWorks";
 import SetupGuide from "./component/setupGuide";
-import { useNavigate } from "react-router";
 
 const Homepage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaid,setIsPaid]=useState(false);
-  const navigate=useNavigate();
 
   useEffect(() => {
     // 1. Fetch the initial session on mount
@@ -77,7 +76,7 @@ const Homepage = () => {
   function handleDownload() {
     if(!session)return userLogIn();
     if(!isPaid)handleGetTubeLense();
-    navigate("/afterDownload");
+    window.location.assign("/afterDownload");
   }
 
   useEffect(()=>{
@@ -115,7 +114,7 @@ const Homepage = () => {
 
   async function handleGetTubeLense(){
     if(!session)return userLogIn();
-    if(isPaid==true){toast.info("already purchased"); navigate("/afterDownload")};
+    if(isPaid==true){toast.info("already purchased"); window.location.assign("/afterDownload")};
       const { data, error } = await supabase.functions.invoke(
     "create-checkout"
   );
@@ -201,21 +200,26 @@ const Homepage = () => {
         {/* Hero Section */}
         <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center justify-start min-h-screen">
           {/* Foreground Text & CTA */}
+         
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-sm shadow-sm backdrop-blur-md">
+            Built exclusively for Youtube<img src={youtubeIcon} className="text-red-500 h-6 w-6" alt="youtube icon" />
+          </div>
+
           <div className="relative z-20 text-center flex flex-col items-center bg-transparent max-w-3xl w-full mb-16">
-            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] m-0 text-white mb-6">
+            <h1 className="text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] m-0 text-white ">
               Watch <br className="sm:hidden" />
               <span className="text-emerald-400 drop-shadow-[0_0_25px_rgba(52,211,153,0.2)]">
                 Intentionally.
               </span>
             </h1>
 
-            <p className="text-lg lg:text-xl text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed font-medium">
+            <p className="text-lg lg:text-xl text-slate-400 mb-4 max-w-2xl mt-2 mx-auto leading-relaxed font-medium">
               A chrome extension to take back control of your youtube feed.Filter out distractions
               automatically with smart, topic-based cards.
             </p>
 
             {/* Buttons and Badge anchored together */}
-            <div className="flex flex-col items-center gap-6 w-full sm:w-auto">
+            <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <button onClick={handleGetTubeLense} className="bg-blue-600 text-white cursor-pointer hover:scale-105 px-8 py-4 rounded-xl font-bold text-base hover:bg-blue-500 transition-all shadow-[0_0_25px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 group w-full sm:w-auto">
                   {"Get TubeLense"}
@@ -254,7 +258,7 @@ const Homepage = () => {
             <img
               src={extImage}
               alt="Background center"
-              className="absolute w-[250px] lg:w-[340px] rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] transform -translate-y-4 border border-slate-700 z-10 transition-transform hover:scale-105 duration-300"
+              className="absolute w-[240px] lg:w-[325px] rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] transform -translate-y-4 border border-slate-700 z-10 transition-transform hover:scale-105 duration-300"
             />
           </div>
         </section>

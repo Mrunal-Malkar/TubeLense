@@ -43,6 +43,9 @@ const Footer = () => {
                   Refund Policy
                 </a>
               </li>
+              <li>
+                <a href="https://www.flaticon.com/free-icons/youtube" className="text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200" title="youtube icons">Yt logo credit</a>
+              </li>
             </ul>
           </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link,useSearchParams } from "react-router";
 
 
 export default function PaymentSuccess() {
@@ -18,10 +18,9 @@ export default function PaymentSuccess() {
   const customerName =
     searchParams.get("name") ||
     searchParams.get("customer_name");
-    const navigate=useNavigate();
 
 
-    setTimeout(()=>navigate("/afterDownload"),10000);
+    setTimeout(()=>window.location.assign("/afterDownload"),10000);
     
 useEffect(() => {
   const timer = setInterval(() => {
@@ -115,7 +114,7 @@ useEffect(() => {
           to="/afterDownload"
           className="mt-8 block w-full rounded-xl bg-white px-5 py-3 text-center font-semibold text-black transition hover:bg-white/90"
         >
-          "Download TubeLense"
+          Download TubeLense
         </Link>
           <p className="text-gray-400 ms-1.5">redirecting to download page in {count}</p>
       </div>

@@ -19,7 +19,7 @@ const Feature = () => {
           
           <h2 className="text-3xl lg:text-5xl font-black mb-6 text-white leading-tight">
             Built for <span className="relative inline-block whitespace-nowrap">
-              deep work
+              productivity
               {/* Decorative curved underline */}
               <svg className="absolute w-full h-3 -bottom-1 left-0 text-blue-500 opacity-80 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round"/>
@@ -90,14 +90,7 @@ const Feature = () => {
             </div>
             
             <div className="h-[540px] rounded-[1.25rem] overflow-hidden bg-slate-900 border border-slate-800 relative shadow-inner">
-              <iframe 
-                className="w-full h-full pointer-events-auto"
-                src="https://youtu.be/xOD69LngPzI" 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen
-              ></iframe>
+              <iframe className="w-full h-full pointer-events-auto" src="https://www.youtube.com/embed/https://xOD69LngPzI" title="Tubelense video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
             </div>
           </div>
 
