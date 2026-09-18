@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import SetupGuide from "../component/setupGuide"; // Adjust the path if needed
 import { supabase } from "../utils/supabase";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 interface paymentDetailsType {
   amount: any;
@@ -90,7 +90,7 @@ const AfterDownload = () => {
 
   // 3. Download Logic via Supabase Storage
   const handleDownload = async () => {
-    if (cooldown > 0 || isDownloading) return;
+    if (cooldown > 0 || isDownloading || !isPaid) return;
 
     try {
       setIsDownloading(true);
@@ -98,7 +98,9 @@ const AfterDownload = () => {
         target_user_id: userId
       });
       
-      if(noteDownloadData!=false){
+      console.log("The noteDownloadData:",noteDownloadData,"the noteDownloadError",noteDownloadError);
+      if(noteDownloadData!=false && noteDownloadError){
+        console.log("got in the condition of =true and noteDownloadError")
       return toast.error(`error occured, contact the support if error persists ${noteDownloadError}`);
       }
 
@@ -108,7 +110,7 @@ const AfterDownload = () => {
 
       if (error) {
         console.error("Error downloading file:", error);
-        alert(
+        toast.error(
           "Failed to download the extension. Please try again or contact support.",
         );
         return;
@@ -179,6 +181,7 @@ const AfterDownload = () => {
 
   return (
     <div className="min-h-screen bg-black text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+      <ToastContainer/>
       {isPaid && (
         <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center flex flex-col items-center">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/20 blur-[100px] rounded-full pointer-events-none -z-10" />

@@ -60,8 +60,6 @@ const SetupGuide = () => {
           {/* Image Placeholder */}
           <div className="flex-1 w-full relative">
             <img src={ExtractFileImg} className="aspect-video bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden group"/>
-              {/* REPLACE THIS DIV WITH YOUR <img src={step1Image} /> */}
-              <span className="text-slate-600 font-medium group-hover:scale-105 transition-transform text-center px-4">Add Extract/Unzip Image Here</span>
           </div>
         </div>
 
@@ -82,8 +80,6 @@ const SetupGuide = () => {
           {/* Image Placeholder */}
           <div className="flex-1 w-full relative">
             <img src={DeveloperModeOnImage} className="aspect-video bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden group"/>
-              {/* REPLACE THIS DIV WITH YOUR <img src={step2Image} /> */}
-              <span className="text-slate-600 font-medium group-hover:scale-105 transition-transform text-center px-4">Add Extensions Page Image Here</span>
           </div>
         </div>
 
@@ -103,8 +99,6 @@ const SetupGuide = () => {
           {/* Image Placeholder */}
           <div className="flex-1 w-full relative">
             <img src={LoadUnpackedImage} className="aspect-video bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden group"/>
-              {/* REPLACE THIS DIV WITH YOUR <img src={step3Image} /> */}
-              <span className="text-slate-600 font-medium group-hover:scale-105 transition-transform text-center px-4">Add "Load Unpacked" Image Here</span>
           </div>
         </div>
 
@@ -125,8 +119,6 @@ const SetupGuide = () => {
           {/* Image Placeholder */}
           <div className="flex-1 w-full relative">
             <img src={SelectFolderImage} className="aspect-video bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden group"/>
-               {/* REPLACE THIS DIV WITH YOUR <img src={step4Image} /> */}
-              <span className="text-slate-600 font-medium group-hover:scale-105 transition-transform text-center px-4">Add Final Step Image Here</span>
           </div>
         </div>
 
