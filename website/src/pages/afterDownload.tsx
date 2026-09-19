@@ -224,6 +224,8 @@ const AfterDownload = () => {
                 </>
               )}
             </button>
+              {isDownloading &&
+              <span className="text-gray-300 text-sm">it may take 30 to 60 seconds to prepare download files.</span>}
 
             <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
               <Sparkles className="w-3.5 h-3.5" />

@@ -141,7 +141,7 @@ const Homepage = () => {
         <div className="flex justify-between items-center">
           
           {/* Logo Area */}
-          <div className="flex items-center gap-3 flex-1 cursor-pointer group">
+          <a href="https://tubelense.vercel.app" className="flex items-center gap-3 flex-1 cursor-pointer group">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 transform -rotate-6 group-hover:rotate-0 transition-transform duration-300 border border-slate-800">
               <img src={logo} alt="Tubelense logo" />
             </div>
@@ -153,7 +153,7 @@ const Homepage = () => {
                 2.0
               </span>
             </div>
-          </div>
+          </a>
 
           {/* Centered Navigation */}
           <div className="hidden md:flex items-center space-x-1 flex-1 justify-center bg-slate-900/50 p-1.5 rounded-full border border-slate-800/50">

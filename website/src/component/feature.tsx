@@ -90,7 +90,7 @@ const Feature = () => {
             </div>
             
             <div className="h-[540px] rounded-[1.25rem] overflow-hidden bg-slate-900 border border-slate-800 relative shadow-inner">
-              <iframe className="w-full h-full pointer-events-auto" src="https://www.youtube.com/embed/https://xOD69LngPzI" title="Tubelense video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+            <iframe className="w-full h-full pointer-events-auto" src="https://www.youtube.com/embed/xOD69LngPzI?si=aen5i3DpiUJkZTED" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
             </div>
           </div>
 
