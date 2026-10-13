@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "TubeLense",
+  "description": "See less noise. Watch more of what matters. Fast,Secure and Local for your youtube feed.",
+  "version": "2.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "favicon.png",
+      "32": "favicon.png"
+    }
+  },
+  "icons": {
+    "16": "favicon.png",
+    "32": "favicon.png",
+    "48": "favicon.png",
+    "128": "favicon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "offscreen"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/content.ts-loader-BjrhWDuA.js",
+        "assets/youtube.ts-loader-BOET0EAq.js"
+      ],
+      "matches": [
+        "*://*.youtube.com/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "wasm/*.wasm"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "resources": [
+        "assets/content-BReRpdrE.js",
+        "assets/baseInfoStore-LsiZQhin.js",
+        "assets/yt-B8Gn-pUY.js",
+        "assets/get-CGPd9QLP.js",
+        "assets/youtube.ts-7UnukPGi.js",
+        "assets/content.ts-SLMco3Of.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}

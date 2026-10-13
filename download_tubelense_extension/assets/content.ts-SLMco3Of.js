@@ -1,0 +1,1 @@
+import{t as e}from"./content-BReRpdrE.js";export{e as getRelativityScore};
